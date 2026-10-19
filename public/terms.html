@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions Générales d'Utilisation — Kawral Sénégal</title>
+  <meta name="description" content="Conditions Générales d'Utilisation (CGU) de la plateforme Kawral (https://kawral.vercel.app).">
+  <meta name="theme-color" content="#123C36">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kawral-green: #123C36;
+      --kawral-darkgreen: #0a2622;
+      --kawral-orange: #F47B20;
+      --kawral-ivory: #FAF7F0;
+      --kawral-dark: #18211F;
+      --kawral-muted: #556561;
+      --kawral-border: #E2DDD5;
+      --kawral-card: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--kawral-ivory);
+      color: var(--kawral-dark);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    header {
+      background-color: var(--kawral-green);
+      color: #FFFFFF;
+      padding: 18px 24px;
+      border-bottom: 3px solid var(--kawral-orange);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(18, 60, 54, 0.15);
+    }
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FFFFFF;
+    }
+    .brand-logo { width: 40px; height: 40px; border-radius: 10px; }
+    .brand-name { font-size: 22px; font-weight: 800; }
+    .brand-name span { color: var(--kawral-orange); }
+    .back-link {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .hero {
+      background: linear-gradient(180deg, var(--kawral-green) 0%, #1a4f47 100%);
+      color: #FFFFFF;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+    .hero-container { max-width: 820px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      background: rgba(244, 123, 32, 0.2);
+      border: 1px solid var(--kawral-orange);
+      color: #FFD2A8;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+    .hero p { font-size: 15px; color: #D2E4E1; max-width: 680px; margin: 0 auto; }
+    .last-updated { margin-top: 14px; font-size: 13px; color: #A3C9C2; }
+    main { max-width: 900px; margin: -24px auto 60px; padding: 0 16px; }
+    .card {
+      background: var(--kawral-card);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--kawral-border);
+    }
+    @media (max-width: 640px) {
+      .card { padding: 24px 18px; border-radius: 16px; }
+      .hero h1 { font-size: 24px; }
+    }
+    section { margin-bottom: 36px; }
+    h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--kawral-green);
+      margin-bottom: 14px;
+      border-bottom: 2px solid #F0ECE4;
+      padding-bottom: 8px;
+    }
+    h3 { font-size: 16px; font-weight: 700; color: var(--kawral-dark); margin: 18px 0 8px; }
+    p { margin-bottom: 14px; color: #2D3735; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; color: #2D3735; }
+    li { margin-bottom: 8px; }
+    .highlight-box {
+      background: #EDF7F5;
+      border-left: 4px solid var(--kawral-green);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+    }
+    footer {
+      background: var(--kawral-darkgreen);
+      color: #A3C9C2;
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 13px;
+    }
+    footer a { color: #FFFFFF; text-decoration: underline; }
+    a { color: var(--kawral-green); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <a href="/" class="brand">
+        <img src="/images/kawral-app-icon.png" alt="Kawral" class="brand-logo">
+        <div class="brand-name">Kaw<span>ral</span></div>
+      </a>
+      <a href="/" class="back-link">← Retour au site</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-container">
+      <span class="badge">Cadre Légal & Réglementaire</span>
+      <h1>Conditions Générales d'Utilisation</h1>
+      <p>Règles d'utilisation de la plateforme de mise en relation immobilière et commerciale Kawral au Sénégal.</p>
+      <p class="last-updated">Dernière mise à jour : <strong>29 Septembre 2026</strong></p>
+    </div>
+  </div>
+
+  <main>
+    <div class="card">
+      <section>
+        <h2>1. Présentation du service</h2>
+        <p>Les présentes Conditions Générales d'Utilisation (CGU) encadrent l'accès et l'utilisation de la plateforme <strong>Kawral</strong>, éditée à l'adresse officielle <a href="https://kawral.vercel.app">https://kawral.vercel.app</a>.</p>
+        <p>Kawral est une plateforme technologique de mise en relation directe entre particuliers et professionnels (agences agréées, courtiers et promoteurs) pour la publication, la consultation et la négociation d'annonces de vente et location au Sénégal.</p>
+      </section>
+
+      <section>
+        <h2>2. Inscription et Authentification</h2>
+        <p>L'utilisation de certaines fonctionnalités avancées (publication d'annonces, messagerie, sauvegarde de favoris) nécessite la création d'un compte utilisateur. L'utilisateur peut s'inscrire au moyen de :</p>
+        <ul>
+          <li>Une adresse email et un mot de passe fort ;</li>
+          <li>Le service d'authentification <strong>Google Sign-In (OAuth 2.0)</strong>, soumis à la stricte application de notre <a href="/privacy">Politique de Confidentialité</a>.</li>
+        </ul>
+        <p>L'utilisateur certifie être âgé d'au moins 18 ans et fournir des informations exactes et véridiques lors de son inscription.</p>
+      </section>
+
+      <section>
+        <h2>3. Règles de publication des annonces</h2>
+        <p>Tout utilisateur publiant une annonce s'engage à respecter les principes suivants :</p>
+        <ul>
+          <li>Détenir les droits légaux sur le bien immobilier, le terrain ou le véhicule mis en vente ou en location ;</li>
+          <li>Fournir des photographies réelles, récentes et exemptes de tout contenu trompeur ou illégal ;</li>
+          <li>Indiquer un prix transparent et une localisation exacte ;</li>
+          <li>Ne publier aucun contenu incitant à la haine, diffamatoire ou contraire aux lois de la République du Sénégal.</li>
+        </ul>
+        <p>Kawral applique une modération stricte et se réserve le droit de suspendre ou supprimer toute annonce ne respectant pas ces critères.</p>
+      </section>
+
+      <section>
+        <h2>4. Protection des Données Personnelles et Google OAuth</h2>
+        <p>Le traitement des données personnelles recueillies sur la plateforme est régi par notre <a href="/privacy">Politique de Confidentialité</a>, conforme à la Loi sénégalaise n° 2008-12 et aux exigences strictes de la <em>Politique relative aux données utilisateur des services d'API Google</em> (Limited Use).</p>
+      </section>
+
+      <section>
+        <h2>5. Responsabilité</h2>
+        <p>Kawral agit en qualité d'hébergeur technique de contenus et intermédiaire de mise en relation. Kawral ne saurait être tenue responsable des accords ou contrats conclus directement entre les utilisateurs en dehors de la plateforme.</p>
+      </section>
+
+      <section>
+        <h2>6. Contact et Support</h2>
+        <div class="highlight-box">
+          <p><strong>Code Crafters Technologies — Kawral</strong></p>
+          <p>Dakar, République du Sénégal</p>
+          <p>Email officiel : <a href="mailto:code.crafters221@gmail.com">code.crafters221@gmail.com</a></p>
+          <p>Site web : <a href="https://kawral.vercel.app">https://kawral.vercel.app</a></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Kawral Technologies. Tous droits réservés.</p>
+    <p style="margin-top: 8px;">
+      <a href="/">Accueil</a> • 
+      <a href="/privacy">Politique de Confidentialité</a> • 
+      <a href="/terms">Conditions d'Utilisation</a>
+    </p>
+  </footer>
+
+</body>
+</html>

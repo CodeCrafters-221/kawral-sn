@@ -1,0 +1,8 @@
+{
+  "name": "Remix Kawral",
+  "description": "Le point de rencontre de l'offre et de la demande au Sénégal (immobilier, véhicules, multimédia, matériel pro) — Achetez. Louez. Vendez.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

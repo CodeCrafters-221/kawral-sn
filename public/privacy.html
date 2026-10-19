@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Politique de Confidentialité — Kawral Sénégal</title>
+  <meta name="description" content="Politique de Confidentialité de l'application Kawral (https://kawral.vercel.app). Détail de la collecte, de l'utilisation et de la protection des données personnelles et conformité Google OAuth.">
+  <meta name="theme-color" content="#123C36">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kawral-green: #123C36;
+      --kawral-darkgreen: #0a2622;
+      --kawral-orange: #F47B20;
+      --kawral-ivory: #FAF7F0;
+      --kawral-dark: #18211F;
+      --kawral-muted: #556561;
+      --kawral-border: #E2DDD5;
+      --kawral-card: #FFFFFF;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--kawral-ivory);
+      color: var(--kawral-dark);
+      line-height: 1.7;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background-color: var(--kawral-green);
+      color: #FFFFFF;
+      padding: 18px 24px;
+      border-bottom: 3px solid var(--kawral-orange);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(18, 60, 54, 0.15);
+    }
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FFFFFF;
+    }
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-name span {
+      color: var(--kawral-orange);
+    }
+    .back-link {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      transition: background 0.2s;
+    }
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    .hero {
+      background: linear-gradient(180deg, var(--kawral-green) 0%, #1a4f47 100%);
+      color: #FFFFFF;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+    .hero-container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(244, 123, 32, 0.2);
+      border: 1px solid var(--kawral-orange);
+      color: #FFD2A8;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 15px;
+      color: #D2E4E1;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .last-updated {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #A3C9C2;
+    }
+    main {
+      max-width: 900px;
+      margin: -24px auto 60px;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--kawral-card);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--kawral-border);
+    }
+    @media (max-width: 640px) {
+      .card {
+        padding: 24px 18px;
+        border-radius: 16px;
+      }
+      .hero h1 {
+        font-size: 24px;
+      }
+    }
+    .toc {
+      background: #F4EFEB;
+      border: 1px solid var(--kawral-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 36px;
+    }
+    .toc h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--kawral-green);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .toc ol {
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--kawral-muted);
+    }
+    .toc li {
+      margin-bottom: 6px;
+    }
+    .toc a {
+      color: var(--kawral-dark);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .toc a:hover {
+      color: var(--kawral-orange);
+      text-decoration: underline;
+    }
+    section {
+      margin-bottom: 40px;
+      scroll-margin-top: 100px;
+    }
+    h2 {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--kawral-green);
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid #F0ECE4;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--kawral-dark);
+      margin: 20px 0 10px;
+    }
+    p {
+      margin-bottom: 14px;
+      color: #2D3735;
+    }
+    ul, ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: #2D3735;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    strong {
+      color: var(--kawral-dark);
+    }
+    .highlight-box {
+      background: #EDF7F5;
+      border-left: 4px solid var(--kawral-green);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .google-box {
+      background: #F8F9FA;
+      border: 2px solid #4285F4;
+      padding: 24px;
+      border-radius: 16px;
+      margin: 24px 0;
+      box-shadow: 0 4px 16px rgba(66, 133, 244, 0.08);
+    }
+    .google-box h3 {
+      color: #1A73E8;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+    }
+    .google-limited-use {
+      background: #FEF7ED;
+      border: 2px solid var(--kawral-orange);
+      padding: 20px;
+      border-radius: 14px;
+      margin: 20px 0;
+    }
+    .google-limited-use h4 {
+      color: #C05621;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .danger-box {
+      background: #FDF2F2;
+      border: 1px solid #F87171;
+      border-left: 4px solid #EF4444;
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+    }
+    .contact-card {
+      background: #F7FAF9;
+      border: 1px solid #D2E4E1;
+      padding: 24px;
+      border-radius: 14px;
+      margin-top: 20px;
+    }
+    footer {
+      background: var(--kawral-darkgreen);
+      color: #A3C9C2;
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 13px;
+    }
+    footer a {
+      color: #FFFFFF;
+      text-decoration: underline;
+    }
+    a {
+      color: var(--kawral-green);
+      font-weight: 600;
+    }
+    a:hover {
+      color: var(--kawral-orange);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--kawral-border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th {
+      background: #F0ECE4;
+      color: var(--kawral-dark);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <a href="/" class="brand">
+        <img src="/images/kawral-app-icon.png" alt="Kawral" class="brand-logo">
+        <div class="brand-name">Kaw<span>ral</span></div>
+      </a>
+      <a href="/" class="back-link">← Retour au site</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-container">
+      <span class="badge">Conformité RGPD, CDP Sénégal & Google OAuth</span>
+      <h1>Règles et Politique de Confidentialité</h1>
+      <p>Engagement officiel de Kawral pour la protection de vos données personnelles, la transparence de nos traitements et le respect strict des normes de sécurité.</p>
+      <p class="last-updated">Dernière mise à jour : <strong>29 Septembre 2026</strong> | Version 2.1</p>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  <main>
+    <div class="card">
+
+      <!-- Table of Contents -->
+      <div class="toc">
+        <h2>Sommaire de la Politique de Confidentialité</h2>
+        <ol>
+          <li><a href="#section-1">Identité de l'application et Responsable du traitement</a></li>
+          <li><a href="#section-2">Données personnelles collectées par Kawral</a></li>
+          <li><a href="#section-3">Authentification Google OAuth 2.0 et Données Utilisateur Google</a></li>
+          <li><a href="#section-4">Finalités et bases légales du traitement</a></li>
+          <li><a href="#section-5">Partage, divulgation et tiers sous-traitants</a></li>
+          <li><a href="#section-6">Sécurité, chiffrement et stockage des données</a></li>
+          <li><a href="#section-7">Durée de conservation des données</a></li>
+          <li><a href="#section-8">Vos droits et procédure de suppression des données (Droit à l'oubli)</a></li>
+          <li><a href="#section-9">Révocation des autorisations Google OAuth</a></li>
+          <li><a href="#section-10">Cookies et technologies de suivi</a></li>
+          <li><a href="#section-11">Protection des mineurs</a></li>
+          <li><a href="#section-12">Contact et Délégué à la Protection des Données</a></li>
+        </ol>
+      </div>
+
+      <!-- Section 1 -->
+      <section id="section-1">
+        <h2>1. Identité de l'application et Responsable du traitement</h2>
+        <p>La présente Politique de Confidentialité s'applique à l'application web et mobile <strong>Kawral</strong>, accessible à l'adresse officielle : <a href="https://kawral.vercel.app">https://kawral.vercel.app</a> (ci-après « la Plateforme », « le Site », « l'Application » ou « Kawral »).</p>
+        <p><strong>Kawral</strong> est une plateforme technologique dédiée à la publication, la recherche et la mise en relation pour l'achat, la vente et la location de biens immobiliers, terrains, véhicules et locaux professionnels au Sénégal.</p>
+        
+        <div class="highlight-box">
+          <p><strong>Responsable du Traitement :</strong></p>
+          <p>Plateforme Kawral — Code Crafters Technologies</p>
+          <p>Siège social : Dakar, République du Sénégal</p>
+          <p>Email de contact officiel : <a href="mailto:code.crafters221@gmail.com">code.crafters221@gmail.com</a></p>
+          <p>URL officielle du service : <a href="https://kawral.vercel.app">https://kawral.vercel.app</a></p>
+        </div>
+        <p>Le traitement des données personnelles sur Kawral est réalisé en stricte conformité avec la <strong>Loi sénégalaise n° 2008-12 du 25 janvier 2008</strong> relative à la protection des données à caractère personnel sous l'égide de la <strong>Commission de Protection des Données Personnelles (CDP)</strong>, ainsi qu'avec les standards internationaux applicables (Règlement Général sur la Protection des Données - RGPD).</p>
+      </section>
+
+      <!-- Section 2 -->
+      <section id="section-2">
+        <h2>2. Données personnelles collectées par Kawral</h2>
+        <p>Nous collectons uniquement les informations adéquates, pertinentes et limitées à ce qui est strictement nécessaire pour fournir nos services :</p>
+        
+        <h3>A. Données d'inscription et de profil</h3>
+        <ul>
+          <li><strong>Nom et prénom :</strong> pour identifier l'utilisateur et personnaliser son compte.</li>
+          <li><strong>Adresse e-mail :</strong> pour la gestion des accès sécurisés, réinitialisation de mot de passe et notifications transactionnelles.</li>
+          <li><strong>Numéro de téléphone (optionnel pour les visiteurs, requis pour les vendeurs et agences) :</strong> pour permettre le contact direct ou via WhatsApp entre acheteurs et annonceurs.</li>
+          <li><strong>Photo de profil / Avatar :</strong> affichée sur votre profil public ou de vendeur.</li>
+          <li><strong>Rôle utilisateur :</strong> Client (acquéreur/locataire), Vendeur particulier, ou Agence immobilière agréée.</li>
+          <li><strong>Informations professionnelles d'agence :</strong> Nom commercial, registre de commerce, adresse du siège, logo de l'agence.</li>
+        </ul>
+
+        <h3>B. Contenu publié par les utilisateurs (Annonces)</h3>
+        <ul>
+          <li>Titres, descriptions détaillées, caractéristiques techniques du bien ou du véhicule.</li>
+          <li>Photographies téléchargées des biens.</li>
+          <li>Enregistrements audio ou notes vocales descriptives (optionnels).</li>
+          <li>Localisation géographique indicative (commune, quartier, ville).</li>
+          <li>Prix demandé et type de transaction (Vente, Location).</li>
+        </ul>
+
+        <h3>C. Données d'interaction et de communication</h3>
+        <ul>
+          <li>Messages privés échangés sur la messagerie interne de Kawral.</li>
+          <li>Demandes de rendez-vous et planification des visites.</li>
+          <li>Historique des annonces enregistrées en favoris.</li>
+        </ul>
+
+        <h3>D. Données techniques et de journalisation</h3>
+        <ul>
+          <li>Adresse IP (conservée temporairement pour la prévention de la fraude et des attaques informatiques).</li>
+          <li>Identifiant de session d'authentification chiffré.</li>
+          <li>Type et version du navigateur web, système d'exploitation de l'appareil.</li>
+        </ul>
+      </section>
+
+      <!-- Section 3 - GOOGLE OAUTH SPECIFIC COMPLIANCE -->
+      <section id="section-3">
+        <h2>3. Authentification Google OAuth 2.0 et Données Utilisateur Google</h2>
+        <p>Kawral offre aux utilisateurs la possibilité de s'inscrire et de s'authentifier facilement à l'aide de leur compte Google via le protocole sécurisé <strong>Google Sign-In (OAuth 2.0)</strong>.</p>
+        
+        <div class="google-box">
+          <h3>Données spécifiques collectées via l'API Google</h3>
+          <p>Lorsque vous choisissez de vous connecter avec Google sur <strong>https://kawral.vercel.app</strong>, notre application demande explicitement votre consentement pour accéder uniquement aux portées (scopes) de base suivantes :</p>
+          <ul>
+            <li><code>openid</code> : pour vous authentifier de manière sécurisée ;</li>
+            <li><code>https://www.googleapis.com/auth/userinfo.email</code> (ou scope <code>email</code>) : pour obtenir votre adresse e-mail principale vérifiée ;</li>
+            <li><code>https://www.googleapis.com/auth/userinfo.profile</code> (ou scope <code>profile</code>) : pour obtenir votre nom complet et votre photo de profil publique.</li>
+          </ul>
+
+          <h3 style="margin-top: 18px;">Utilisation exacte de ces données Google par Kawral :</h3>
+          <ul>
+            <li><strong>Adresse e-mail Google :</strong> sert d'identifiant unique de compte Kawral pour vous permettre de vous connecter sans mot de passe supplémentaire.</li>
+            <li><strong>Nom et prénom Google :</strong> pré-remplissent votre profil public d'utilisateur ou d'annonceur sur Kawral.</li>
+            <li><strong>Photo de profil Google :</strong> sert d'avatar par défaut de votre compte Kawral (vous pouvez la modifier à tout moment).</li>
+          </ul>
+        </div>
+
+        <div class="google-limited-use">
+          <h4>Respect de la Politique relative aux données utilisateur des services d'API Google</h4>
+          <p><strong>L'utilisation et le transfert par Kawral vers toute autre application des informations reçues des API Google respecteront scrupuleusement la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Politique relative aux données utilisateur des services d'API Google</a>, y compris les exigences d'utilisation limitée (*Limited Use requirements*).</strong></p>
+        </div>
+
+        <h3>Engagements formels de Kawral concernant les Données Utilisateur Google :</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Engagement Google</th>
+              <th>Pratique appliquée par Kawral</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Pas de revente de données</strong></td>
+              <td>Kawral ne vend, ne loue, ne cède et ne commercialise <strong>JAMAIS</strong> vos données utilisateur Google à aucun tiers, régie publicitaire, courtier en données ou partenaire commercial.</td>
+            </tr>
+            <tr>
+              <td><strong>Pas de publicité ciblée</strong></td>
+              <td>Les données obtenues via les API Google ne sont <strong>JAMAIS</strong> utilisées pour vous diffuser de la publicité ciblée ou pour effectuer du profilage publicitaire.</td>
+            </tr>
+            <tr>
+              <td><strong>Pas d'entraînement d'IA</strong></td>
+              <td>Les données utilisateur reçues de Google ne sont <strong>JAMAIS</strong> utilisées pour entraîner des modèles d'intelligence artificielle ou d'apprentissage automatique généralistes ou tiers.</td>
+            </tr>
+            <tr>
+              <td><strong>Accès humain strictement restreint</strong></td>
+              <td>Aucun humain ne lit ou n'accède à vos données Google chez Kawral, sauf si : (1) vous nous donnez votre consentement exprès pour résoudre un incident technique, (2) cela est strictement nécessaire pour des motifs de sécurité interne ou de lutte contre la fraude, ou (3) en vertu d'une obligation légale sénégalaise exécutoire.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 4 -->
+      <section id="section-4">
+        <h2>4. Finalités et bases légales du traitement</h2>
+        <p>Les données personnelles recueillies sur Kawral sont utilisées exclusivement pour les finalités suivantes :</p>
+        <ul>
+          <li><strong>Fourniture du service (Exécution du contrat) :</strong> Création de votre compte utilisateur, publication et affichage de vos annonces, gestion de vos favoris, planification de visites et messagerie instantanée.</li>
+          <li><strong>Sécurisation de la plateforme (Intérêt légitime) :</strong> Vérification de l'authenticité des comptes, détection et blocage des spams, fraudes et annonces frauduleuses.</li>
+          <li><strong>Notifications et alertes (Consentement / Exécution) :</strong> Envoi de courriels transactionnels (création de compte, confirmation de visite, messages non lus).</li>
+          <li><strong>Conformité légale :</strong> Respect des obligations fiscales, civiles et pénales applicables en République du Sénégal.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section id="section-5">
+        <h2>5. Partage, divulgation et tiers sous-traitants</h2>
+        <p>Kawral applique le principe de stricte confidentialité. Nous ne partageons vos données qu'avec les prestataires techniques de premier plan indispensables au fonctionnement de la Plateforme :</p>
+        <ul>
+          <li><strong>Supabase Inc. (Base de données et Authentification sécurisée) :</strong> Hébergement de la base de données PostgreSQL chiffrée, gestion des identifiants et stockage sécurisé des images. Supabase est certifié SOC 2 Type II et conforme au RGPD.</li>
+          <li><strong>Vercel Inc. (Hébergement web et CDN) :</strong> Distribution globale sécurisée de l'application avec chiffrement HTTPS/TLS 1.3 de bout en bout.</li>
+          <li><strong>Autres utilisateurs (sur votre décision) :</strong> Lorsque vous publiez une annonce, vos coordonnées de contact (téléphone, lien WhatsApp) sont affichées aux acheteurs potentiels selon vos préférences de publication.</li>
+        </ul>
+        <p><strong>Aucun autre transfert :</strong> Nous ne transmettons aucune donnée personnelle à des fins commerciales. Les seules divulgations autorisées sont celles exigées par une autorité judiciaire ou administrative sénégalaise en vertu d'un mandat légal.</p>
+      </section>
+
+      <!-- Section 6 -->
+      <section id="section-6">
+        <h2>6. Sécurité, chiffrement et stockage des données</h2>
+        <p>La sécurité de vos données est une priorité absolue chez Kawral. Nous appliquons des normes industrielles de pointe :</p>
+        <ul>
+          <li><strong>Chiffrement des communications :</strong> 100 % du trafic entre votre navigateur et Kawral est chiffré via HTTPS avec le protocole TLS 1.3.</li>
+          <li><strong>Chiffrement des données stockées :</strong> Les bases de données sont chiffrées au repos (AES-256). Les mots de passe sont hachés avec des fonctions cryptographiques non réversibles.</li>
+          <li><strong>Contrôle d'accès basé sur les rôles (Row Level Security - RLS) :</strong> Nos tables de données utilisent le cloisonnement PostgreSQL RLS : un utilisateur ne peut en aucun cas lire ou modifier les données privées d'un autre utilisateur.</li>
+          <li><strong>Protection contre les attaques :</strong> Protection automatisée contre les attaques DDoS, les injections SQL et les failles XSS.</li>
+        </ul>
+      </section>
+
+      <!-- Section 7 -->
+      <section id="section-7">
+        <h2>7. Durée de conservation des données</h2>
+        <p>Vos données sont conservées aussi longtemps que votre compte reste actif :</p>
+        <ul>
+          <li><strong>Données de profil et de compte :</strong> conservées pendant toute la durée d'utilisation de votre compte.</li>
+          <li><strong>Annonces publiées :</strong> conservées jusqu'à leur suppression par l'utilisateur ou par la modération (ou clôture après vente).</li>
+          <li><strong>Messages et conversations :</strong> conservés pendant la durée de vie du compte pour vous permettre de retrouver vos échanges avec les acheteurs/vendeurs.</li>
+          <li><strong>En cas d'inactivité prolongée :</strong> les comptes inactifs depuis plus de 24 mois sans aucune connexion sont notifiés puis supprimés.</li>
+          <li><strong>En cas de demande de suppression :</strong> purge intégrale sous 48 à 72 heures ouvrées.</li>
+        </ul>
+      </section>
+
+      <!-- Section 8 - DATA DELETION -->
+      <section id="section-8">
+        <h2>8. Vos droits et procédure de suppression des données (Droit à l'oubli)</h2>
+        <p>Conformément à la Loi sénégalaise n° 2008-12 et aux réglementations internationales sur la protection des données, vous disposez des droits suivants :</p>
+        <ul>
+          <li><strong>Droit d'accès :</strong> vous pouvez demander une copie complète des données personnelles que nous détenons à votre sujet.</li>
+          <li><strong>Droit de rectification :</strong> vous pouvez modifier à tout moment vos informations personnelles depuis votre profil Kawral ou sur simple demande.</li>
+          <li><strong>Droit à l'effacement (« Droit à l'oubli ») :</strong> vous avez le droit de demander la suppression définitive et irréversible de votre compte et de toutes les données associées.</li>
+          <li><strong>Droit d'opposition et de limitation :</strong> vous pouvez vous opposer à certains traitements ou demander leur limitation.</li>
+        </ul>
+
+        <div class="danger-box">
+          <h3 style="color: #B91C1C; margin-top: 0;">Procédure claire pour demander la suppression de vos données :</h3>
+          <p>Pour faire valoir votre droit à la suppression définitive de votre compte et de vos données personnelles :</p>
+          <ol>
+            <li>Envoyez un e-mail à : <a href="mailto:code.crafters221@gmail.com" style="color: #DC2626; font-weight: 700;">code.crafters221@gmail.com</a></li>
+            <li>Objet de l'e-mail : <strong>« Demande de suppression de compte et données — Kawral »</strong></li>
+            <li>Précisez l'adresse e-mail associée à votre compte Kawral (ou l'adresse e-mail de votre compte Google utilisé lors de la connexion).</li>
+            <li>Notre équipe accusera réception et procèdera à la <strong>purge définitive de votre compte, de vos annonces, photos, messages et identifiants dans un délai maximum de 48 heures ouvrées</strong>.</li>
+            <li>Un e-mail de confirmation de destruction complète de vos données vous sera adressé dès l'opération finalisée.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Section 9 - GOOGLE REVOCATION -->
+      <section id="section-9">
+        <h2>9. Révocation des autorisations Google OAuth</h2>
+        <p>Si vous avez connecté votre compte Google à Kawral et souhaitez révoquer l'accès à vos données Google à tout moment, vous pouvez le faire directement depuis la console de sécurité Google, sans intervention de notre part :</p>
+        <ol>
+          <li>Rendez-vous sur la page officielle des autorisations de votre compte Google : <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">https://myaccount.google.com/permissions</a></li>
+          <li>Recherchez l'application <strong>« Kawral »</strong> dans la liste des applications tierces autorisées.</li>
+          <li>Cliquez sur « Kawral » puis sur le bouton <strong>« Supprimer l'accès »</strong>.</li>
+        </ol>
+        <p>Dès cette action effectuée, Kawral n'aura plus aucun accès à vos informations Google.</p>
+      </section>
+
+      <!-- Section 10 -->
+      <section id="section-10">
+        <h2>10. Cookies et technologies de stockage local</h2>
+        <p>Kawral utilise des technologies de stockage local strictement nécessaires à votre navigation :</p>
+        <ul>
+          <li><strong>Jetons d'authentification (LocalStorage / Cookies de session) :</strong> utilisés exclusivement pour maintenir votre session connectée de manière sécurisée d'une page à l'autre.</li>
+          <li><strong>Préférences d'affichage :</strong> mémorisation de vos filtres de recherche récents et fermeture de la bannière d'installation PWA.</li>
+          <li><strong>Absence de traceurs publicitaires tiers :</strong> Kawral n'utilise aucun cookie de ciblage publicitaire ni aucun traceur intrusif externe qui surveille vos activités sur d'autres sites web.</li>
+        </ul>
+      </section>
+
+      <!-- Section 11 -->
+      <section id="section-11">
+        <h2>11. Protection des mineurs</h2>
+        <p>Les services de Kawral sont réservés aux personnes âgées d'au moins 18 ans disposant de la capacité juridique pour conclure des transactions immobilières ou de vente de biens. Nous ne collectons pas sciemment de données auprès d'enfants ou de mineurs. Si nous apprenons que des données de mineurs ont été collectées par inadvertance, nous procéderons immédiatement à leur suppression.</p>
+      </section>
+
+      <!-- Section 12 -->
+      <section id="section-12">
+        <h2>12. Contact et Délégué à la Protection des Données</h2>
+        <p>Pour toute question relative à la présente Politique de Confidentialité, à l'exercice de vos droits ou à la conformité de l'authentification Google OAuth, vous pouvez contacter notre équipe dédiée :</p>
+        
+        <div class="contact-card">
+          <p><strong>Équipe de Protection des Données & Support Kawral</strong></p>
+          <p>Dakar, République du Sénégal</p>
+          <p>Courriel officiel : <a href="mailto:code.crafters221@gmail.com" style="color: var(--kawral-green); font-weight: 700;">code.crafters221@gmail.com</a></p>
+          <p>Site Internet : <a href="https://kawral.vercel.app">https://kawral.vercel.app</a></p>
+          <p>Délai de réponse moyen : <strong>moins de 24 heures ouvrées</strong></p>
+        </div>
+
+        <p style="margin-top: 24px; font-size: 13px; color: var(--kawral-muted);">
+          Si vous estimez, après nous avoir contactés, que vos droits sur vos données personnelles ne sont pas respectés, vous pouvez adresser une réclamation auprès de la Commission de Protection des Données Personnelles du Sénégal (CDP — <a href="https://www.cdp.sn" target="_blank" rel="noopener noreferrer">www.cdp.sn</a>).
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Kawral Technologies. Tous droits réservés. Plateforme Marketplace au Sénégal.</p>
+    <p style="margin-top: 8px;">
+      <a href="/">Accueil</a> • 
+      <a href="/privacy">Politique de Confidentialité</a> • 
+      <a href="/terms">Conditions d'Utilisation</a> • 
+      <a href="mailto:code.crafters221@gmail.com">Contact Support</a>
+    </p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmez votre nouvel email – Kawral</title>
+</head>
+<body style="margin:0;padding:0;background-color:#FAF7F0;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FAF7F0;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px;">
+
+          <!-- LOGO -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#0B4D45;border-radius:12px;padding:12px 24px;">
+                    <span style="font-size:22px;font-weight:700;color:#FAF7F0;letter-spacing:1px;font-family:'Segoe UI',Roboto,Arial,sans-serif;">KAWRAL</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CARD -->
+          <tr>
+            <td style="background-color:#FFFFFF;border-radius:16px;border:1px solid #E5E0D8;overflow:hidden;">
+
+              <!-- TOP BAND -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td style="background-color:#0B4D45;height:6px;"></td>
+                </tr>
+              </table>
+
+              <!-- BODY -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="padding:40px 40px 32px;">
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <div style="width:56px;height:56px;background-color:#F0F9F7;border-radius:50%;display:inline-block;text-align:center;line-height:56px;font-size:26px;">📧</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#18211F;font-family:'Segoe UI',Roboto,Arial,sans-serif;">Confirmez votre nouvel email</h1>
+                    <p style="margin:0 0 8px;font-size:15px;color:#66726D;line-height:1.6;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                      Vous avez demandé à modifier l'adresse email de votre compte <strong style="color:#0B4D45;">Kawral</strong>.
+                    </p>
+                    <p style="margin:0 0 28px;font-size:15px;color:#66726D;line-height:1.6;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                      Cliquez ci-dessous pour confirmer <strong style="color:#18211F;">{{ .NewEmail }}</strong> comme votre nouvelle adresse email.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:28px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block;background-color:#0B4D45;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;font-family:'Segoe UI',Roboto,Arial,sans-serif;letter-spacing:0.3px;">
+                      Confirmer mon nouvel email
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="background-color:#FAF7F0;border-radius:8px;padding:16px;border:1px solid #E5E0D8;">
+                      <p style="margin:0 0 6px;font-size:12px;color:#66726D;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                        Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :
+                      </p>
+                      <p style="margin:0;font-size:12px;color:#0B4D45;word-break:break-all;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                        {{ .ConfirmationURL }}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ALERTE SÉCURITÉ -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="padding:0 40px 32px;">
+                <tr>
+                  <td>
+                    <div style="background-color:#FEF3EB;border-left:3px solid #F47B20;border-radius:0 8px 8px 0;padding:14px 16px;">
+                      <p style="margin:0;font-size:13px;color:#66726D;line-height:1.5;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                        ⚠️ Si vous n'avez pas demandé ce changement d'email, contactez immédiatement notre support.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- FOOTER CARD -->
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="padding:0 40px 32px;">
+                <tr>
+                  <td>
+                    <div style="border-top:1px solid #E5E0D8;padding-top:20px;">
+                      <p style="margin:0;font-size:12px;color:#66726D;line-height:1.6;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                        Ce lien expire dans <strong>24 heures</strong>.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER EMAIL -->
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#66726D;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                © 2026 Kawral – La marketplace immobilière
+              </p>
+              <p style="margin:0;font-size:12px;color:#A0ABA5;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+                Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
