@@ -38,6 +38,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           src={imgSrc}
           alt={listing.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+          style={{ height: '100%' }}
           fallback={FALLBACK_IMG}
           loading={imageLoading}
           decoding="async"
