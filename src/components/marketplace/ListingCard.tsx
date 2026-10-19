@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Listing } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { formatPriceFCFA, getCategoryLabel } from '../../utils/formatters';
+import { formatPriceFCFA } from '../../utils/formatters';
 import { Heart, MapPin } from 'lucide-react';
 import { Badge, SafeImage } from '../ui';
 
@@ -28,7 +28,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     <article className="group relative bg-white rounded-2xl border border-kawral-border shadow-xs overflow-hidden isolate hover:border-kawral-green hover:shadow-xl transition-all duration-300 flex flex-1 w-full h-full">
       <Link
         to={`/listings/${listing.id}`}
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`flex flex-1 w-full h-full no-underline ${
           layout === 'list' ? 'flex-col md:flex-row' : 'flex-col'
         }`}
@@ -44,14 +43,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           decoding="async"
         />
 
-        {/* Category badge */}
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex items-center gap-1 sm:gap-1.5">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
           <Badge
-            variant="primary"
+            variant={listing.transactionType === 'rent' ? 'primary' : 'accent'}
             size="sm"
-            className="uppercase tracking-wider shadow-md font-extrabold backdrop-blur-sm text-[9px] sm:text-[10px] px-1.5 py-0.5 sm:px-2 bg-kawral-green text-white border-kawral-green max-w-[calc(100%-2.5rem)] truncate"
+            className={`uppercase tracking-wider shadow-md font-extrabold backdrop-blur-sm text-[9px] sm:text-[10px] px-1.5 py-0.5 sm:px-2 ${
+              listing.transactionType === 'rent'
+                ? 'bg-kawral-darkgreen text-white border-kawral-darkgreen'
+                : 'bg-kawral-orange text-white border-kawral-orange'
+            }`}
           >
-            {getCategoryLabel(listing.category)}
+            {listing.transactionType === 'rent' ? 'À LOUER' : 'À VENDRE'}
           </Badge>
         </div>
       </div>

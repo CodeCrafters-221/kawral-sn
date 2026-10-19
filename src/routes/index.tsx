@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState, useRef } from "react";
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useState, useRef } from "react";
 import {
 	Navigate,
 	Route,
@@ -93,6 +93,20 @@ const RouteLoadingFallback: React.FC = () => (
 		<p className="font-semibold text-kawral-dark">Chargement de la page...</p>
 	</div>
 );
+
+const ListingDetailRoute: React.FC = () => {
+	const { pathname } = useLocation();
+
+	useLayoutEffect(() => {
+		window.scrollTo({ top: 0, behavior: "instant" });
+	}, [pathname]);
+
+	return (
+		<Suspense fallback={<RouteLoadingFallback />}>
+			<ListingDetailPage />
+		</Suspense>
+	);
+};
 
 /** Protège une route : redirige vers /auth/login si l'utilisateur n'est pas connecté */
 const ProtectedRoute: React.FC<{
@@ -432,15 +446,15 @@ export const AppRoutes: React.FC = () => {
 			/>
 			<Route
 				path="/listings/:id"
-				element={<ListingDetailPage />}
+				element={<ListingDetailRoute />}
 			/>
 			<Route
 				path="/annonces/:id"
-				element={<ListingDetailPage />}
+				element={<ListingDetailRoute />}
 			/>
 			<Route
 				path="/annonce/:id"
-				element={<ListingDetailPage />}
+				element={<ListingDetailRoute />}
 			/>
 			<Route path="/agencies" element={<Navigate to="/explorer" replace />} />
 			<Route
