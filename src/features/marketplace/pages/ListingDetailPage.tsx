@@ -9,7 +9,7 @@ import { ListingHeroGallery } from "../components/listing-detail/ListingHeroGall
 import { ListingKeyStats } from "../components/listing-detail/ListingKeyStats";
 import { ListingLocationMap } from "../components/listing-detail/ListingLocationMap";
 import { ListingMobileBottomBar } from "../components/listing-detail/ListingMobileBottomBar";
-import { CheckCircle2, ShieldAlert, Shield, Check, Zap, ArrowLeft, ChevronRight, Home, MapPin, Tag, KeyRound, PauseCircle } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Shield, Check, Zap, ArrowLeft, ChevronLeft, ChevronRight, Home, MapPin, Tag, KeyRound, PauseCircle } from "lucide-react";
 import { listingsService } from "../../../services/supabase/listingsService";
 import { ListingCard } from "../../../components/marketplace/ListingCard";
 import { Listing } from "../../../types";
@@ -72,9 +72,6 @@ export const ListingDetailPage: React.FC = () => {
   // True when the connected user is looking at their own listing
   const isOwner = !!(currentUser && listing && currentUser.id === listing.ownerId);
 
-  // Sellers cannot buy or rent
-  const isSeller = currentUser?.role === 'seller';
-
   useEffect(() => {
     if (listing?.id) {
       // Pour être sûr à 100% que tu vois le compteur bouger pendant tes tests,
@@ -85,16 +82,53 @@ export const ListingDetailPage: React.FC = () => {
   }, [listing?.id]);
 
   const [similarListings, setSimilarListings] = useState<Listing[]>([]);
+  const [similarPage, setSimilarPage] = useState(1);
+  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
+  const [similarListingsError, setSimilarListingsError] = useState(false);
 
   useEffect(() => {
-    if (listing?.category && listing?.id) {
-      listingsService
-        .fetchSimilarListings(listing.category, listing.id, 4)
-        .then((data) => {
-          setSimilarListings(data);
-        });
+    if (!listing?.category || !listing.id) {
+      setSimilarListings([]);
+      return;
     }
+
+    let isMounted = true;
+    setSimilarPage(1);
+    setSimilarListings([]);
+    setSimilarListingsError(false);
+    setIsLoadingSimilar(true);
+
+    listingsService
+      .fetchSimilarListings(listing.category, listing.id, 60)
+      .then((data) => {
+        if (isMounted) setSimilarListings(data);
+      })
+      .catch(() => {
+        if (isMounted) setSimilarListingsError(true);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSimilar(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [listing?.category, listing?.id]);
+
+  const similarPageSize = 4;
+  const similarPageCount = Math.ceil(similarListings.length / similarPageSize);
+  const visibleSimilarListings = similarListings.slice(
+    (similarPage - 1) * similarPageSize,
+    similarPage * similarPageSize,
+  );
+  const firstVisibleSimilarPage = Math.max(
+    1,
+    Math.min(similarPage - 1, similarPageCount - 2),
+  );
+  const visibleSimilarPages = Array.from(
+    { length: Math.min(3, similarPageCount) },
+    (_, index) => firstVisibleSimilarPage + index,
+  );
 
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [showPhone, setShowPhone] = useState(false);
@@ -485,7 +519,7 @@ export const ListingDetailPage: React.FC = () => {
                   </div>
 
                   {/* Contact (mobile): placed right above "Signaler un problème" */}
-                  {!isOwner && !isSeller && (
+                  {!isOwner && (
                     !isListingAvailable ? (
                       <div className="bg-white rounded-3xl border border-slate-200 p-5 text-center space-y-1.5 shadow-xs">
                         <p className="text-sm font-bold text-slate-800">
@@ -524,17 +558,7 @@ export const ListingDetailPage: React.FC = () => {
           {/* Vendor Info: desktop only (on mobile the fixed bottom CTA bar covers contact actions) */}
           {!isOwner && (
             <div className="hidden lg:block lg:w-[40%] xl:w-[35%] lg:sticky lg:top-24 z-20">
-              {isSeller ? (
-                <div className="bg-white rounded-3xl border border-kawral-border p-6 shadow-lg text-center space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto">
-                    <Shield className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <p className="text-sm font-bold text-kawral-dark">Accès restreint</p>
-                  <p className="text-xs text-kawral-muted leading-relaxed">
-                    En tant que vendeur, vous ne pouvez pas acheter ni louer un bien sur Kawral.
-                  </p>
-                </div>
-              ) : !isListingAvailable ? (
+              {!isListingAvailable ? (
                 <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-lg text-center space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
                     <ShieldAlert className="w-6 h-6" />
@@ -567,12 +591,65 @@ export const ListingDetailPage: React.FC = () => {
         <h2 className="text-xl sm:text-2xl font-black text-kawral-dark mb-6 sm:mb-8">
           Annonces similaires
         </h2>
-        {similarListings.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {similarListings.map((item) => (
-              <ListingCard key={item.id} listing={item} />
-            ))}
-          </div>
+        {isLoadingSimilar ? (
+          <p className="text-kawral-muted text-sm font-semibold" role="status">
+            Chargement des annonces similaires...
+          </p>
+        ) : similarListingsError ? (
+          <p className="text-rose-600 text-sm font-semibold" role="alert">
+            Impossible de charger les annonces similaires pour le moment.
+          </p>
+        ) : similarListings.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              {visibleSimilarListings.map((item) => (
+                <div key={item.id} className="min-w-0 flex h-full">
+                  <ListingCard listing={item} />
+                </div>
+              ))}
+            </div>
+            {similarPageCount > 1 && (
+              <nav
+                className="flex items-center justify-center gap-1.5 mt-6"
+                aria-label="Pagination des annonces similaires"
+              >
+                <button
+                  type="button"
+                  onClick={() => setSimilarPage((page) => Math.max(1, page - 1))}
+                  disabled={similarPage === 1}
+                  aria-label="Page précédente"
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-kawral-border text-kawral-dark hover:bg-kawral-ivory disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {visibleSimilarPages.map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setSimilarPage(page)}
+                    aria-label={`Page ${page}`}
+                    aria-current={similarPage === page ? "page" : undefined}
+                    className={`w-10 h-10 rounded-xl border text-sm font-bold transition-colors cursor-pointer ${
+                      similarPage === page
+                        ? "bg-kawral-green text-white border-kawral-green"
+                        : "bg-white text-kawral-dark border-kawral-border hover:bg-kawral-ivory"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setSimilarPage((page) => Math.min(similarPageCount, page + 1))}
+                  disabled={similarPage === similarPageCount}
+                  aria-label="Page suivante"
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-kawral-border text-kawral-dark hover:bg-kawral-ivory disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </nav>
+            )}
+          </>
         ) : (
           <p className="text-kawral-muted text-sm font-semibold">
             Aucune annonce similaire pour le moment.
@@ -580,7 +657,7 @@ export const ListingDetailPage: React.FC = () => {
         )}
       </div>
 
-      {!isOwner && !isSeller && canBookAppointment && (
+      {!isOwner && canBookAppointment && (
         <AppointmentModal
           listing={listing}
           isOpen={appointmentOpen}

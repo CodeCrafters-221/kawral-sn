@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { CategoryType, TransactionType, ListingStatus } from "../../../types";
@@ -98,6 +98,8 @@ export const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
+  const scrollToStepHeading = useRef(false);
+  const stepHeadingRef = useRef<HTMLDivElement>(null);
   const [listingId] = useState(() => id || generateUUID());
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -129,6 +131,19 @@ export const CreateListingPage: React.FC = () => {
   const currentStep = Math.min(step, totalSteps);
   const currentStepConfig = activeSteps[currentStep - 1] || activeSteps[0];
   const currentStepId = currentStepConfig.id;
+
+  useLayoutEffect(() => {
+    if (!scrollToStepHeading.current) return;
+    scrollToStepHeading.current = false;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    stepHeadingRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [currentStep]);
 
   const handleCategoryChange = (newCat: CategoryType) => {
     if (newCat === category) return;
@@ -304,7 +319,11 @@ export const CreateListingPage: React.FC = () => {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setStep((p) => Math.min(totalSteps, p + 1));
+      const nextStep = Math.min(totalSteps, currentStep + 1);
+      if (nextStep !== currentStep) {
+        scrollToStepHeading.current = true;
+        setStep(nextStep);
+      }
     }
   };
 
@@ -432,7 +451,7 @@ export const CreateListingPage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 pt-6 sm:pt-8 md:pt-10 pb-32 sm:pb-24 space-y-8 w-full min-w-0 max-w-full overflow-hidden">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div ref={stepHeadingRef} className="text-center space-y-2 scroll-mt-20 sm:scroll-mt-24">
         <span className="inline-block bg-kawral-orange text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">
           Étape {currentStep} sur {totalSteps}
         </span>

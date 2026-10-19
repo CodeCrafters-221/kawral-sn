@@ -84,9 +84,12 @@ export const NavbarDesktopNav: React.FC<NavbarDesktopNavProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (isSeller) {
-    return (
-      <nav className="hidden lg:flex items-center gap-6 text-[15px] font-medium">
+  const active = CATEGORIES[hovered];
+  const ActiveIcon = active.icon;
+
+  return (
+    <nav className="hidden lg:flex items-center gap-6 text-[15px] font-medium">
+      {isSeller && (
         <button
           onClick={() => onNavigateTo('seller-dashboard')}
           className={`transition-colors duration-500 ease-in-out cursor-pointer ${
@@ -95,15 +98,8 @@ export const NavbarDesktopNav: React.FC<NavbarDesktopNavProps> = ({
         >
           Mon espace vendeur
         </button>
-      </nav>
-    );
-  }
+      )}
 
-  const active = CATEGORIES[hovered];
-  const ActiveIcon = active.icon;
-
-  return (
-    <nav className="hidden lg:flex items-center gap-6 text-[15px] font-medium">
       {/* Mega-menu Explorer */}
       <div className="relative" ref={dropdownRef}>
         <button

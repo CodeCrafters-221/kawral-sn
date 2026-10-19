@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { lazy, Suspense, useEffect, useState, useRef } from "react";
 import {
 	Navigate,
 	Route,
@@ -14,27 +14,83 @@ import { supabase } from "../lib/supabase";
 import { toAppRole, toDbRole, getRoleDashboardPath } from "../utils/roles";
 
 // Pages
-import { HomePage } from "../features/marketplace/pages/HomePage";
-import { SearchPage } from "../features/marketplace/pages/SearchPage";
-import { ListingDetailPage } from "../features/marketplace/pages/ListingDetailPage";
-import { CreateListingPage } from "../features/seller/pages/CreateListingPage";
-import { ClientDashboard } from "../features/client/pages/ClientDashboard";
-import { SellerDashboard } from "../features/seller/pages/SellerDashboard";
-import { AdminDashboard } from "../features/admin/pages/AdminDashboard";
-import { MessagingPage } from "../features/shared/pages/MessagingPage";
-import { AppointmentsPage } from "../features/shared/pages/AppointmentsPage";
-import { FavoritesPage } from "../features/client/pages/FavoritesPage";
-import { NotFoundPage } from "../features/shared/pages/NotFoundPage";
-import { ResetPasswordPage } from "../features/shared/pages/ResetPasswordPage";
-import { PrivacyPolicyPage } from "../features/legal/pages/PrivacyPolicyPage";
-import { TermsOfServicePage } from "../features/legal/pages/TermsOfServicePage";
+const HomePage = lazy(() =>
+	import("../features/marketplace/pages/HomePage").then((module) => ({
+		default: module.HomePage,
+	})),
+);
+const SearchPage = lazy(() =>
+	import("../features/marketplace/pages/SearchPage").then((module) => ({
+		default: module.SearchPage,
+	})),
+);
+const ListingDetailPage = lazy(() =>
+	import("../features/marketplace/pages/ListingDetailPage").then(
+		(module) => ({ default: module.ListingDetailPage }),
+	),
+);
+const CreateListingPage = lazy(() =>
+	import("../features/seller/pages/CreateListingPage").then((module) => ({
+		default: module.CreateListingPage,
+	})),
+);
+const ClientDashboard = lazy(() =>
+	import("../features/client/pages/ClientDashboard").then((module) => ({
+		default: module.ClientDashboard,
+	})),
+);
+const SellerDashboard = lazy(() =>
+	import("../features/seller/pages/SellerDashboard").then((module) => ({
+		default: module.SellerDashboard,
+	})),
+);
+const AdminDashboard = lazy(() =>
+	import("../features/admin/pages/AdminDashboard").then((module) => ({
+		default: module.AdminDashboard,
+	})),
+);
+const MessagingPage = lazy(() =>
+	import("../features/shared/pages/MessagingPage").then((module) => ({
+		default: module.MessagingPage,
+	})),
+);
+const AppointmentsPage = lazy(() =>
+	import("../features/shared/pages/AppointmentsPage").then((module) => ({
+		default: module.AppointmentsPage,
+	})),
+);
+const FavoritesPage = lazy(() =>
+	import("../features/client/pages/FavoritesPage").then((module) => ({
+		default: module.FavoritesPage,
+	})),
+);
+const NotFoundPage = lazy(() =>
+	import("../features/shared/pages/NotFoundPage").then((module) => ({
+		default: module.NotFoundPage,
+	})),
+);
+const ResetPasswordPage = lazy(() =>
+	import("../features/shared/pages/ResetPasswordPage").then((module) => ({
+		default: module.ResetPasswordPage,
+	})),
+);
+const PrivacyPolicyPage = lazy(() =>
+	import("../features/legal/pages/PrivacyPolicyPage").then((module) => ({
+		default: module.PrivacyPolicyPage,
+	})),
+);
+const TermsOfServicePage = lazy(() =>
+	import("../features/legal/pages/TermsOfServicePage").then((module) => ({
+		default: module.TermsOfServicePage,
+	})),
+);
 
 // --- Route Helper Components ---
 
 const RouteLoadingFallback: React.FC = () => (
 	<div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-kawral-muted text-sm">
 		<div className="w-8 h-8 border-3 border-kawral-green border-t-transparent rounded-full animate-spin" />
-		<p className="font-semibold text-kawral-dark">Chargement de votre espace sécurisé...</p>
+		<p className="font-semibold text-kawral-dark">Chargement de la page...</p>
 	</div>
 );
 
@@ -357,6 +413,7 @@ const RoleProtectedRoute: React.FC<{
 
 export const AppRoutes: React.FC = () => {
 	return (
+		<Suspense fallback={<RouteLoadingFallback />}>
 		<Routes>
 			{/* Public */}
 			<Route path="/" element={<HomePage />} />
@@ -541,5 +598,6 @@ export const AppRoutes: React.FC = () => {
 			{/* 404 */}
 			<Route path="*" element={<NotFoundPage />} />
 		</Routes>
+		</Suspense>
 	);
 };

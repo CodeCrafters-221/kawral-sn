@@ -248,17 +248,17 @@ export const AppProvider: React.FC<{
 		setIsLoadingListings(true);
 		if (isSupabaseConfigured()) {
 			try {
-				const { data: profilesData } = await supabase
-					.from("profiles")
-					.select("*");
+				const [{ data: profilesData }, fetchedListings] =
+					await Promise.all([
+						supabase.from("profiles").select("*"),
+						listingsService.fetchListings(),
+					]);
 				const profilesMap: Record<string, any> = {};
 				profilesData?.forEach((p: any) => {
 					profilesMap[p.id] = p;
 				});
 				profilesRef.current = profilesMap;
 
-				const fetchedListings =
-					await listingsService.fetchListings();
 				setListings(fetchedListings);
 
 				const listingsMap: Record<string, Listing> = {};
@@ -266,25 +266,28 @@ export const AppProvider: React.FC<{
 					listingsMap[l.id] = l;
 				});
 				listingsRef.current = listingsMap;
+				setIsLoadingListings(false);
 
-				const {
-					conversations: fetchedConvs,
-					messages: fetchedMsgs,
-				} =
-					await messagesService.fetchConversationsAndMessages(
+				const [
+					{
+						conversations: fetchedConvs,
+						messages: fetchedMsgs,
+					},
+					fetchedAppts,
+				] = await Promise.all([
+					messagesService.fetchConversationsAndMessages(
 						listingsMap,
 						profilesMap,
 						undefined,
 						supabaseUser?.id,
-					);
-				setConversations(fetchedConvs);
-				setMessages(fetchedMsgs);
-
-				const fetchedAppts =
-					await appointmentsService.fetchAppointments(
+					),
+					appointmentsService.fetchAppointments(
 						listingsMap,
 						profilesMap,
-					);
+					),
+				]);
+				setConversations(fetchedConvs);
+				setMessages(fetchedMsgs);
 				setAppointments(fetchedAppts);
 			} catch (err) {
 				console.error("Supabase fetch error:", err);
@@ -797,7 +800,7 @@ export const AppProvider: React.FC<{
 		const loadFavorites = async () => {
 			if (
 				!currentUser?.id ||
-				currentUser.role !== "client"
+				(currentUser.role !== "client" && currentUser.role !== "seller")
 			) {
 				setFavorites([]);
 				return;
@@ -868,9 +871,12 @@ export const AppProvider: React.FC<{
 
 	// ── Favorites ────────────────────────────────────────────────────────────
 	const toggleFavorite = async (id: string) => {
-		if (!currentUser || currentUser.role !== "client") {
+		if (
+			!currentUser ||
+			(currentUser.role !== "client" && currentUser.role !== "seller")
+		) {
 			addToast(
-				"Connectez-vous en tant que client pour gérer vos favoris.",
+				"Connectez-vous avec un compte client ou vendeur pour gérer vos favoris.",
 				"info",
 			);
 			return;

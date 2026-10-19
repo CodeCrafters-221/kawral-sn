@@ -214,7 +214,7 @@ export const listingsService = {
   /**
    * Fetch similar listings directly from the database
    */
-  async fetchSimilarListings(categorySlug: string, excludeId: string, limitCount = 4): Promise<Listing[]> {
+  async fetchSimilarListings(categorySlug: string, excludeId: string, limitCount = 60): Promise<Listing[]> {
     if (!isSupabaseConfigured()) return [];
 
     try {
@@ -244,9 +244,10 @@ export const listingsService = {
         ]),
       );
 
-      const { data: catRows } = await (supabase.from as any)("categories")
+      const { data: catRows, error: categoryError } = await (supabase.from as any)("categories")
         .select("id")
         .in("slug", dbSlugs);
+      if (categoryError) throw categoryError;
       const categoryIds: string[] = (catRows ?? []).map((c: any) => c.id);
 
       // Toutes les valeurs possibles de attributes.category pour cette catégorie principale
@@ -280,7 +281,8 @@ export const listingsService = {
         .limit(60);
       const { data: listingsData, error } = await query;
 
-      if (error || !listingsData) return [];
+      if (error) throw error;
+      if (!listingsData) return [];
 
       const entities = listingsData.map(mapDatabaseListingToEntity);
       // Même sous-catégorie en premier, puis le reste de la catégorie principale
@@ -289,7 +291,7 @@ export const listingsService = {
       return [...sameSub, ...others].slice(0, limitCount);
     } catch (error) {
       console.error("listingsService.fetchSimilarListings error:", error);
-      return [];
+      throw error;
     }
   },
 

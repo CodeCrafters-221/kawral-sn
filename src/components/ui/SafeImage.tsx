@@ -19,13 +19,11 @@ export const SafeImage: React.FC<SafeImageProps> = ({
   onLoad,
   ...props
 }) => {
-  const [error,  setError]  = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
 
   // Reset when src changes
   useEffect(() => {
     setError(false);
-    setLoaded(false);
   }, [src]);
 
   const resolved = (!src || src.trim() === '' || error) ? fallback : src;
@@ -36,7 +34,7 @@ export const SafeImage: React.FC<SafeImageProps> = ({
       src={resolved}
       alt={alt}
       className={className}
-      onLoad={(e) => { setLoaded(true); onLoad?.(e); }}
+      onLoad={onLoad}
       onError={() => setError(true)}
     />
   );

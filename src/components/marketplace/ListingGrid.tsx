@@ -153,7 +153,7 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
               : undefined
           }
         >
-          {listings.map((item) => (
+          {listings.map((item, index) => (
             <div
               key={item.id}
               className={
@@ -162,7 +162,11 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
                   : 'min-w-0 flex flex-col h-full self-stretch'
               }
             >
-              <ListingCard listing={item} layout={layout} />
+              <ListingCard
+                listing={item}
+                layout={layout}
+                imageLoading={index < 4 ? 'eager' : 'lazy'}
+              />
             </div>
           ))}
         </div>
