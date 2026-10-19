@@ -235,9 +235,6 @@ export const StepBasicInfo: React.FC<Props> = ({
           <label className="block text-xs font-bold text-kawral-dark">
             Description de l'annonce <span className="text-rose-500">*</span>
           </label>
-          <span className="text-[11px] text-kawral-muted font-medium">
-            Choisissez le format de présentation
-          </span>
         </div>
 
         {/* Onglets de sélection du mode */}
