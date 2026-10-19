@@ -142,8 +142,8 @@ export const MobileProfileBottomSheet: React.FC<MobileProfileBottomSheetProps> =
             </button>
           )}
 
-          {/* Favoris — client uniquement */}
-          {currentUser.role === 'client' && (
+          {/* Favoris — client et vendeur */}
+          {(currentUser.role === 'client' || currentUser.role === 'seller') && (
             <button
               onClick={() => {
                 onClose();

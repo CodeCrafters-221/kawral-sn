@@ -47,8 +47,8 @@ export const NavbarUserMenuItems: React.FC<NavbarUserMenuItemsProps> = ({
           <span>Mon Tableau de bord</span>
         </button>
 
-        {/* Favoris — client uniquement */}
-        {currentUser.role === 'client' && (
+        {/* Favoris — client et vendeur */}
+        {(currentUser.role === 'client' || currentUser.role === 'seller') && (
           <button
             onClick={() => {
               onNavigateTo('favorites');

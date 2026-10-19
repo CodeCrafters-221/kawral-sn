@@ -553,11 +553,7 @@ export const MessagingPage: React.FC = () => {
 							<div className="flex-1 relative flex items-center">
 								<input
 									type="text"
-									placeholder={
-										currentUser.role === "client"
-											? "Écrivez un message..."
-											: "Répondez au client..."
-									}
+									placeholder="Écrivez un message..."
 									value={text}
 									onChange={(e) => setText(e.target.value)}
 									className="w-full py-2.5 sm:py-3 px-4 bg-kawral-ivory border border-slate-200 focus:border-kawral-green focus:bg-white rounded-full text-xs sm:text-sm font-medium outline-none transition-all placeholder:text-slate-400"
