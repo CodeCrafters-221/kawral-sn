@@ -1,20 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import {
-  Building2,
-  Home as HomeIcon,
-  TreePine as LandIcon,
-  Car,
-  Store,
-  Bed,
-  Package,
-  Briefcase,
-  Shirt,
-  Tv,
-  Gamepad2,
-  Truck,
-  Bike,
-  ChevronDown,
-  ChevronUp,
   Check,
   Mic,
   Square,
@@ -37,12 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../../components/ui/select";
-import {
-  findMainCategory,
-  findParentMainCategory,
-  getDefaultSubcategorySlug,
-  isRentEligibleCategory,
-} from "../../../../data/categoriesData";
+import { isRentEligibleCategory } from "../../../../data/categoriesData";
 import { getCategoryLabel } from "../../../../utils/formatters";
 
 interface Props {
@@ -61,175 +41,11 @@ interface Props {
   pricePeriod: "month" | "day" | "total";
   setPricePeriod: (v: "month" | "day" | "total") => void;
   transactionType: TransactionType;
-  category?: CategoryType;
-  setCategory?: (v: CategoryType) => void;
+  category: CategoryType;
   region?: string;
   city?: string;
   neighborhood?: string;
 }
-
-export const CATEGORY_DEFINITIONS: Record<
-  string,
-  {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    description: string;
-  }
-> = {
-  // Catégories principales
-  immobilier: {
-    label: "Immobilier",
-    icon: Building2,
-    description: "Appartements, villas, terrains, locaux",
-  },
-  vehicules: {
-    label: "Véhicules",
-    icon: Car,
-    description: "Voitures, motos, utilitaires",
-  },
-  "materiel-pro": {
-    label: "Matériel pro",
-    icon: Briefcase,
-    description: "Équipements et outillage professionnel",
-  },
-  mode: {
-    label: "Mode",
-    icon: Shirt,
-    description: "Vêtements, chaussures, accessoires",
-  },
-  "maison-jardin": {
-    label: "Maison & jardin",
-    icon: HomeIcon,
-    description: "Mobilier, décoration, jardinage",
-  },
-  electronique: {
-    label: "Électronique",
-    icon: Tv,
-    description: "Smartphones, ordinateurs, audio, TV",
-  },
-  loisirs: {
-    label: "Loisirs",
-    icon: Gamepad2,
-    description: "Sport, jeux vidéo, livres, divertissement",
-  },
-  autres: {
-    label: "Autres",
-    icon: Package,
-    description: "Divers articles et services",
-  },
-  // Sous-catégories & legacy
-  apartment: {
-    label: "Appartement",
-    icon: Building2,
-    description: "Appartement, studio, duplex",
-  },
-  house: {
-    label: "Maison / Villa",
-    icon: HomeIcon,
-    description: "Villa, maison avec cour",
-  },
-  land: {
-    label: "Terrain",
-    icon: LandIcon,
-    description: "Terrain nu, parcelle, TF, agricole",
-  },
-  vehicle: {
-    label: "Véhicule",
-    icon: Car,
-    description: "Voiture, SUV, moto, utilitaire",
-  },
-  commercial: {
-    label: "Local commercial",
-    icon: Store,
-    description: "Boutique, bureau, entrepôt",
-  },
-  room: {
-    label: "Chambre",
-    icon: Bed,
-    description: "Chambre meublée, colocation",
-  },
-  voitures: {
-    label: "Voitures",
-    icon: Car,
-    description: "Véhicules particuliers, SUV, berlines",
-  },
-  motos: {
-    label: "Motos & Scooters",
-    icon: Bike,
-    description: "Motos, deux-roues, quads",
-  },
-  utilitaires: {
-    label: "Utilitaires & Camions",
-    icon: Truck,
-    description: "Camionnettes, fourgons, engins",
-  },
-  real_estate: {
-    label: "Immobilier",
-    icon: Building2,
-    description: "Bien immobilier divers",
-  },
-  other: {
-    label: "Autres",
-    icon: Package,
-    description: "Autres types d'annonces et biens divers",
-  },
-};
-
-export const AVAILABLE_CATEGORIES: Array<{
-  id: CategoryType;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  description: string;
-}> = [
-  {
-    id: "immobilier",
-    label: "Immobilier",
-    icon: Building2,
-    description: "Appartement, maison, terrain, local",
-  },
-  {
-    id: "vehicules",
-    label: "Véhicules",
-    icon: Car,
-    description: "Voiture, moto, camion, utilitaire",
-  },
-  {
-    id: "materiel-pro",
-    label: "Matériel pro",
-    icon: Briefcase,
-    description: "Outillage, matériel professionnel",
-  },
-  {
-    id: "mode",
-    label: "Mode",
-    icon: Shirt,
-    description: "Vêtements, chaussures, sacs",
-  },
-  {
-    id: "maison-jardin",
-    label: "Maison & jardin",
-    icon: HomeIcon,
-    description: "Meubles, déco, électroménager",
-  },
-  {
-    id: "electronique",
-    label: "Électronique",
-    icon: Tv,
-    description: "Téléphones, PC, télévisions, son",
-  },
-  {
-    id: "loisirs",
-    label: "Loisirs",
-    icon: Gamepad2,
-    description: "Sport, multimédia, jeux, musique",
-  },
-  {
-    id: "autres",
-    label: "Autres",
-    icon: Package,
-    description: "Autres articles et biens divers",
-  },
-];
 
 const CATEGORY_PLACEHOLDERS: Record<string, { title: string; desc: string }> = {
   apartment: {
@@ -325,13 +141,11 @@ export const StepBasicInfo: React.FC<Props> = ({
   pricePeriod,
   setPricePeriod,
   transactionType,
-  category = "apartment",
-  setCategory,
+  category,
   city,
   neighborhood,
 }) => {
   const { addToast } = useApp();
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Audio Recorder Hook
@@ -350,32 +164,13 @@ export const StepBasicInfo: React.FC<Props> = ({
     }
   }, [recorder.audioUrl, setAudioUrl]);
 
-  const categoryDef =
-    CATEGORY_DEFINITIONS[category] || (() => {
-      const parentCategory = findParentMainCategory(category);
-      const subcategory = parentCategory?.subcategories.find(
-        (item) => item.slug === category
-      );
-      const mainCategory = findMainCategory(category);
-
-      return {
-        label: getCategoryLabel(category),
-        icon: subcategory?.icon || mainCategory?.icon || parentCategory?.icon || Package,
-        description:
-          parentCategory?.description ||
-          mainCategory?.description ||
-          "Article à vendre sur Kawral",
-      };
-    })();
-  const categoryName = categoryDef.label;
-  const CategoryIcon = categoryDef.icon;
+  const categoryName = getCategoryLabel(category);
   const placeholders =
     CATEGORY_PLACEHOLDERS[category] || {
       title: `Ex: ${categoryName}...`,
       desc: `Décrivez les détails de votre annonce ${categoryName.toLowerCase()} (état, caractéristiques, prix et éléments inclus)...`,
     };
   const canRent = isRentEligibleCategory(category);
-  const transactionName = transactionType === "rent" ? "Location" : "Vente";
 
   // Handle direct audio file upload from disk
   const handleAudioFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -419,84 +214,6 @@ export const StepBasicInfo: React.FC<Props> = ({
 
   return (
     <div className="space-y-6 w-full max-w-full min-w-0">
-      {/* 🏷️ Indicateur de catégorie active & Sélecteur rapide */}
-      <div className="bg-gradient-to-r from-emerald-50/70 via-white to-slate-50 border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 w-full max-w-full min-w-0 overflow-hidden">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-kawral-green text-white flex items-center justify-center shrink-0 shadow-sm">
-              <CategoryIcon className="w-4 h-4 sm:w-5 sm:h-5 text-kawral-orange shrink-0" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-kawral-green bg-kawral-green/10 px-2 py-0.5 rounded-md whitespace-nowrap">
-                  {canRent ? "Catégorie du bien" : "Catégorie de l'article"}
-                </span>
-                <span className="text-[11px] text-slate-400">•</span>
-                <span className="text-[11px] font-semibold text-slate-600 whitespace-nowrap">
-                  {!canRent || transactionType === "sale" ? "À vendre (Vente)" : "À louer (Location)"}
-                </span>
-              </div>
-              <h3 className="text-sm sm:text-base font-black text-kawral-dark truncate">
-                {categoryName}
-                <span className="text-xs font-normal text-kawral-muted ml-2 hidden sm:inline">
-                  ({categoryDef.description})
-                </span>
-              </h3>
-            </div>
-          </div>
-
-          {setCategory && (
-            <button
-              type="button"
-              onClick={() => setShowCategoryPicker((prev) => !prev)}
-              className="px-2.5 py-1.5 text-xs font-bold text-kawral-green hover:text-white bg-kawral-green/10 hover:bg-kawral-green rounded-xl transition-all flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
-              title="Changer la catégorie du bien"
-            >
-              <span className="hidden sm:inline">{showCategoryPicker ? 'Fermer' : 'Changer de catégorie'}</span>
-              <span className="sm:hidden">{showCategoryPicker ? 'Fermer' : 'Modifier'}</span>
-              {showCategoryPicker ? (
-                <ChevronUp className="w-3.5 h-3.5 shrink-0" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 shrink-0" />
-              )}
-            </button>
-          )}
-        </div>
-
-        {setCategory && showCategoryPicker && (
-          <div className="pt-3 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in w-full max-w-full min-w-0">
-            {AVAILABLE_CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = cat.id === category;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => {
-                    setCategory(
-                      (getDefaultSubcategorySlug(cat.id) || cat.id) as CategoryType
-                    );
-                    setShowCategoryPicker(false);
-                  }}
-                  className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer min-w-0 max-w-full overflow-hidden ${
-                    isSelected
-                      ? "border-kawral-green bg-kawral-green text-white shadow-xs font-bold"
-                      : "border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-semibold"
-                  }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 ${
-                      isSelected ? "text-kawral-orange" : "text-slate-500"
-                    }`}
-                  />
-                  <span className="text-xs truncate flex-1 min-w-0">{cat.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* ── Titre de l'annonce ───────────────────────────────────────── */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-kawral-dark">

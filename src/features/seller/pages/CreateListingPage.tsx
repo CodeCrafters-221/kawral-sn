@@ -591,7 +591,6 @@ export const CreateListingPage: React.FC = () => {
             setPricePeriod={setPricePeriod}
             transactionType={transactionType}
             category={category}
-            setCategory={handleCategoryChange}
             region={region}
             city={city}
             neighborhood={neighborhood}
