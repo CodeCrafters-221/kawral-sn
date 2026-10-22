@@ -11,7 +11,11 @@ import type { Session } from "@supabase/supabase-js";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
-import { toAppRole, toDbRole, getRoleDashboardPath } from "../utils/roles";
+import {
+	toSafeRegistrationAppRole,
+	toSafeRegistrationDbRole,
+	getRoleDashboardPath,
+} from "../utils/roles";
 
 // Pages
 const HomePage = lazy(() =>
@@ -278,6 +282,7 @@ const AuthCallback: React.FC = () => {
 				}
 
 				// Déterminer le rôle cible (query param > storage > meta > client)
+				// SÉCURITÉ : Interdire l'attribution du rôle 'admin' depuis l'URL ou le localStorage
 				let pendingRole: string | undefined =
 					searchParams.get("role") || undefined;
 				try {
@@ -292,12 +297,12 @@ const AuthCallback: React.FC = () => {
 					console.warn("Erreur lecture pending oauth:", e);
 				}
 
-				const targetRole = toAppRole(
+				const targetRole = toSafeRegistrationAppRole(
 					pendingRole ||
 						activeSession.user.user_metadata?.role ||
 						"client",
 				);
-				const dbRole = toDbRole(targetRole);
+				const dbRole = toSafeRegistrationDbRole(targetRole);
 				const userId = activeSession.user.id;
 				const userMeta = activeSession.user.user_metadata || {};
 				const fullName =
@@ -376,7 +381,7 @@ const AuthCallback: React.FC = () => {
 			console.warn("AuthCallback: Timeout de sécurité déclenché.");
 			supabase.auth.getSession().then(({ data: { session: sess } }) => {
 				if (sess?.user) {
-					const role = toAppRole(sess.user.user_metadata?.role);
+					const role = toSafeRegistrationAppRole(sess.user.user_metadata?.role);
 					navigate(getRoleDashboardPath(role), { replace: true });
 				} else {
 					navigate("/auth/login", { replace: true });
@@ -402,7 +407,7 @@ const RoleProtectedRoute: React.FC<{
 	allowedRoles: ("client" | "seller" | "admin")[];
 	children: React.ReactNode;
 }> = ({ allowedRoles, children }) => {
-	const { session, loading } = useAuth();
+	const { session, loading, profile } = useAuth();
 	const { currentUser } = useApp();
 
 	if (loading && !session && !currentUser) return <RouteLoadingFallback />;
@@ -413,11 +418,23 @@ const RoleProtectedRoute: React.FC<{
 
 	if (!currentUser) return <RouteLoadingFallback />;
 
+	// SÉCURITÉ : Pour toute route exigeant 'admin', vérifier impérativement que le profil en base a role === 'admin'
+	if (
+		allowedRoles.includes("admin") &&
+		!allowedRoles.includes("client") &&
+		!allowedRoles.includes("seller")
+	) {
+		if (loading && !profile) return <RouteLoadingFallback />;
+		if (profile?.role !== "admin" || currentUser.role !== "admin") {
+			return <Navigate to={`/dashboard/${currentUser.role === "seller" ? "seller" : "client"}`} replace />;
+		}
+	}
+
 	if (!allowedRoles.includes(currentUser.role as any)) {
 		const fallback =
-			currentUser.role === "admin"
+			currentUser.role === "admin" && profile?.role === "admin"
 				? "/admin"
-				: `/dashboard/${currentUser.role}`;
+				: `/dashboard/${currentUser.role === "seller" ? "seller" : "client"}`;
 		return <Navigate to={fallback} replace />;
 	}
 	return <>{children}</>;

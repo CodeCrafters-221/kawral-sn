@@ -15,7 +15,10 @@ import {
 	Database,
 } from "../lib/supabase";
 import { UserRole } from "../types";
-import { toAppRole, toDbRole } from "../utils/roles";
+import {
+	toSafeRegistrationAppRole,
+	toSafeRegistrationDbRole,
+} from "../utils/roles";
 
 type ProfileRow =
 	Database["public"]["Tables"]["profiles"]["Row"];
@@ -111,29 +114,35 @@ export const AuthProvider: React.FC<{
 					console.warn("Could not read oauth pending registration:", e);
 				}
 
+				// SÉCURITÉ : Ne jamais accepter le rôle 'admin' depuis localStorage ou user_metadata
 				const metaRole = (currentUserMeta?.role || supabaseUser?.user_metadata?.role) as string | undefined;
-				const effectivePendingRole: UserRole | undefined =
+				const effectivePendingRole: "client" | "seller" | undefined =
 					oauthPending?.role
-						? toAppRole(oauthPending.role)
+						? toSafeRegistrationAppRole(oauthPending.role)
 						: metaRole
-							? toAppRole(metaRole)
+							? toSafeRegistrationAppRole(metaRole)
 							: undefined;
 
-				const requestedDbRole = toDbRole(effectivePendingRole);
+				const requestedDbRole = toSafeRegistrationDbRole(effectivePendingRole);
 
 				if (data) {
 					const profileData = data as any;
+					const isDatabaseAdmin = profileData.role === "admin";
 
-					if (effectivePendingRole && profileData.role !== requestedDbRole) {
-						if (requestedDbRole === "vendeur") {
-							try {
-								await (supabase.rpc as any)("upgrade_user_to_seller");
-							} catch (rpcEx) {
-								console.warn("fetchProfile upgrade_user_to_seller RPC warning:", rpcEx);
-							}
+					// Ne synchroniser le rôle que si l'utilisateur n'est pas déjà admin en base
+					// et uniquement lors d'un passage légitime vers vendeur
+					if (
+						!isDatabaseAdmin &&
+						effectivePendingRole &&
+						profileData.role !== requestedDbRole &&
+						requestedDbRole === "vendeur"
+					) {
+						try {
+							await (supabase.rpc as any)("upgrade_user_to_seller");
+						} catch (rpcEx) {
+							console.warn("fetchProfile upgrade_user_to_seller RPC warning:", rpcEx);
 						}
 
-						// 1. Attempt database profile update
 						const { error: roleError } = await (supabase.from as any)("profiles")
 							.update({
 								role: requestedDbRole,
@@ -143,13 +152,14 @@ export const AuthProvider: React.FC<{
 
 						if (roleError) {
 							console.warn("OAuth role update DB warning:", roleError.message);
+						} else {
+							profileData.role = requestedDbRole;
 						}
 
-						// 2. ALWAYS enforce the requested role in local profile data
-						profileData.role = requestedDbRole;
-
-						// 3. Update user_metadata in auth.users only if different
-						if (currentUserMeta?.role !== effectivePendingRole && supabaseUser?.user_metadata?.role !== effectivePendingRole) {
+						if (
+							currentUserMeta?.role !== effectivePendingRole &&
+							supabaseUser?.user_metadata?.role !== effectivePendingRole
+						) {
 							await supabase.auth.updateUser({
 								data: { role: effectivePendingRole },
 							});
@@ -186,7 +196,7 @@ export const AuthProvider: React.FC<{
 							.eq("id", userId);
 					}
 				} else {
-					// Fallback if profile row is not yet in public.profiles table
+					// Fallback si la ligne n'existe pas encore dans public.profiles
 					const userMeta =
 						currentUserMeta ||
 						supabaseUser?.user_metadata ||
@@ -194,8 +204,8 @@ export const AuthProvider: React.FC<{
 
 					const chosenRole =
 						effectivePendingRole ||
-						toAppRole((userMeta.role as string) || "client");
-					const dbRole = toDbRole(chosenRole);
+						toSafeRegistrationAppRole((userMeta.role as string) || "client");
+					const dbRole = toSafeRegistrationDbRole(chosenRole);
 
 					const googleAvatar = userMeta.avatar_url || userMeta.picture || null;
 
@@ -390,7 +400,8 @@ export const AuthProvider: React.FC<{
 			};
 		}
 
-		const roleMapped = toDbRole(options?.role);
+		// SÉCURITÉ : Interdire l'inscription directe en tant qu'admin
+		const roleMapped = toSafeRegistrationDbRole(options?.role);
 
 		const cleanEmail = email.trim().toLowerCase();
 
@@ -565,10 +576,14 @@ export const AuthProvider: React.FC<{
 			};
 		}
 
-		if (options?.role) {
+		const safeRole = options?.role
+			? toSafeRegistrationAppRole(options.role)
+			: undefined;
+
+		if (safeRole) {
 			try {
 				const pendingData = JSON.stringify({
-					role: options.role,
+					role: safeRole,
 					timestamp: Date.now(),
 				});
 				localStorage.setItem("kawral_pending_oauth_registration", pendingData);
@@ -585,8 +600,8 @@ export const AuthProvider: React.FC<{
 			}
 		}
 
-		const redirectTo = options?.role
-			? `${window.location.origin}/auth/callback?role=${encodeURIComponent(options.role)}`
+		const redirectTo = safeRole
+			? `${window.location.origin}/auth/callback?role=${encodeURIComponent(safeRole)}`
 			: `${window.location.origin}/auth/callback`;
 
 		console.info("[AuthContext] Initiating Google OAuth with redirectTo:", redirectTo);
@@ -598,9 +613,9 @@ export const AuthProvider: React.FC<{
 				queryParams: {
 					prompt: "select_account",
 				},
-				...(options?.role && {
+				...(safeRole && {
 					data: {
-						role: options.role,
+						role: safeRole,
 					},
 				}),
 			} as any,

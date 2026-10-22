@@ -4,6 +4,7 @@ import { toValidUUID, generateUUID } from "../../utils/uuid";
 import { deleteListingImages } from "./storageService";
 import { getCategoryLabel } from "../../utils/formatters";
 import { isCategoryMatching, findParentMainCategory, getAllCategorySlugs } from "../../data/categoriesData";
+import { sanitizeSafeUrl, sanitizeSafeUrlList } from "../../lib/validation";
 
 /**
  * Helper to map raw Supabase listing records (with joined relations) to the Listing entity
@@ -13,7 +14,7 @@ export function mapDatabaseListingToEntity(item: any): Listing {
     item.listing_images
       ?.sort((a: any, b: any) => a.display_order - b.display_order)
       .map((img: any) => img.image_url) || [];
-  const images = Array.from(new Set<string>(imageUrls));
+  const images = Array.from(new Set<string>(sanitizeSafeUrlList(imageUrls)));
 
   const locParts = (item.location || "")
     .split(",")
@@ -61,11 +62,15 @@ export function mapDatabaseListingToEntity(item: any): Listing {
     attrs.pricePeriod || (transactionType === "rent" ? "month" : "total");
   const characteristics = attrs.characteristics || {};
 
+  const safeAudioUrl = sanitizeSafeUrl(
+    item.audio_description_url || attrs.audioDescriptionUrl
+  );
+
   return {
     id: item.id,
     title: item.title,
     description: item.description,
-    audioDescriptionUrl: item.audio_description_url || attrs.audioDescriptionUrl || undefined,
+    audioDescriptionUrl: safeAudioUrl || undefined,
     category: catSlug as any,
     categoryLabel: catName,
     transactionType: transactionType as any,
@@ -98,7 +103,7 @@ export function mapDatabaseListingToEntity(item: any): Listing {
             : "owner",
       phone: profile.phone || "",
       email: profile.email || "",
-      avatar: profile.avatar_url || "",
+      avatar: sanitizeSafeUrl(profile.avatar_url),
       verified: true,
     },
     views: item.views_count || 0,
@@ -218,9 +223,10 @@ export const listingsService = {
     if (!isSupabaseConfigured()) return [];
 
     try {
+      const validExcludeId = toValidUUID(excludeId);
       // Normalise les alias historiques (vehicle/vehicule -> vehicules, etc.)
       const normalize = (slug: string): string => {
-        const s = (slug || "").toLowerCase().trim();
+        const s = (slug || "").toLowerCase().trim().replace(/[^a-z0-9_-]/g, "");
         if (s === "vehicle" || s === "vehicule") return "vehicules";
         if (s === "other" || s === "autre" || s === "divers") return "autres";
         if (s === "real_estate") return "immobilier";
@@ -275,7 +281,7 @@ export const listingsService = {
           listing_images ( image_url, is_cover, display_order )
         `)
         .eq("status", "published")
-        .neq("id", excludeId)
+        .neq("id", validExcludeId)
         .or(orParts.join(","))
         .order("created_at", { ascending: false })
         .limit(60);
@@ -315,6 +321,7 @@ export const listingsService = {
           ? statusOrAdmin
           : "published";
       const validUserId = toValidUUID(userId);
+      const validListingId = toValidUUID(newId);
 
       // 1. Fetch category ID dynamically by slug
       const catSlugStr = String(data.category);
@@ -366,6 +373,9 @@ export const listingsService = {
         agencyId = agencyData ? agencyData.id : null;
       }
 
+      const safeAudioUrl = sanitizeSafeUrl(data.audioDescriptionUrl) || undefined;
+      const safeImages = sanitizeSafeUrlList(data.images);
+
       // 3. Prepare JSONB attributes containing characteristics, category, transactionType, pricePeriod and audioDescriptionUrl
       const attributes = {
         category: data.category,
@@ -377,18 +387,18 @@ export const listingsService = {
           data.pricePeriod ||
           (data.transactionType === "rent" ? "month" : "total"),
         characteristics: data.characteristics || {},
-        audioDescriptionUrl: data.audioDescriptionUrl,
+        audioDescriptionUrl: safeAudioUrl,
       };
 
       const { data: inserted, error } = await (supabase.from as any)("listings")
         .insert({
-          id: newId,
+          id: validListingId,
           user_id: validUserId,
           category_id: categoryId,
           agency_id: agencyId,
-          title: data.title,
-          description: data.description,
-          audio_description_url: data.audioDescriptionUrl || null,
+          title: (data.title || "").trim().slice(0, 200),
+          description: (data.description || "").trim().slice(0, 5000),
+          audio_description_url: safeAudioUrl || null,
           price: data.price,
           location: `${data.location.city}, ${data.location.neighborhood}`,
           status: dbStatus,
@@ -406,9 +416,9 @@ export const listingsService = {
         return null;
       }
 
-      if (data.images && data.images.length > 0) {
-        const listingDbId = inserted?.id || newId;
-        const imgRows = Array.from(new Set(data.images)).map((url, index) => ({
+      if (safeImages.length > 0) {
+        const listingDbId = inserted?.id || validListingId;
+        const imgRows = Array.from(new Set(safeImages)).map((url, index) => ({
           id: generateUUID(),
           listing_id: listingDbId,
           image_url: url,
@@ -471,6 +481,10 @@ export const listingsService = {
     if (!isSupabaseConfigured()) return true;
     try {
       const validId = toValidUUID(id);
+      const safeAudioUpdate =
+        updates.audioDescriptionUrl !== undefined
+          ? sanitizeSafeUrl(updates.audioDescriptionUrl) || null
+          : undefined;
 
       // Prepare attributes if updates contains characteristics, transactionType or pricePeriod
       const attributesUpdate: Record<string, any> = {};
@@ -486,8 +500,8 @@ export const listingsService = {
         attributesUpdate.pricePeriod = updates.pricePeriod;
       if (updates.characteristics)
         attributesUpdate.characteristics = updates.characteristics;
-      if (updates.audioDescriptionUrl !== undefined)
-        attributesUpdate.audioDescriptionUrl = updates.audioDescriptionUrl;
+      if (safeAudioUpdate !== undefined)
+        attributesUpdate.audioDescriptionUrl = safeAudioUpdate;
 
       // 1. Fetch current attributes to merge
       let mergedAttributes = {};
@@ -548,10 +562,10 @@ export const listingsService = {
         "listings",
       )
         .update({
-          ...(updates.title && { title: updates.title }),
-          ...(updates.description && { description: updates.description }),
-          ...(updates.audioDescriptionUrl !== undefined && {
-            audio_description_url: updates.audioDescriptionUrl,
+          ...(updates.title && { title: updates.title.trim().slice(0, 200) }),
+          ...(updates.description && { description: updates.description.trim().slice(0, 5000) }),
+          ...(safeAudioUpdate !== undefined && {
+            audio_description_url: safeAudioUpdate,
           }),
           ...(updates.price && { price: updates.price }),
           ...(updates.location && {
@@ -577,6 +591,7 @@ export const listingsService = {
 
       // 3. Handle image updates if updates.images is provided
       if (updates.images !== undefined) {
+        const safeImages = sanitizeSafeUrlList(updates.images);
         const { data: listingOwner } = await (supabase.from as any)("listings")
           .select("user_id")
           .eq("id", validId)
@@ -591,7 +606,7 @@ export const listingsService = {
               const toRemove = existingFiles
                 .filter(
                   (f) =>
-                    !updates.images!.some((url) => url.includes(f.name)),
+                    !safeImages.some((url) => url.includes(f.name)),
                 )
                 .map((f) => `${listingOwner.user_id}/${validId}/${f.name}`);
               if (toRemove.length > 0) {
@@ -614,7 +629,7 @@ export const listingsService = {
         if (deleteImagesError) throw deleteImagesError;
 
         // Insert new ones
-        const imgRows = Array.from(new Set(updates.images)).map(
+        const imgRows = Array.from(new Set(safeImages)).map(
           (url, index) => ({
             id: generateUUID(),
             listing_id: validId,
@@ -699,7 +714,10 @@ export const listingsService = {
 
       // Location — ilike on raw location column ("City, Neighbourhood")
       if (filters.location && filters.location.trim()) {
-        const cleanLocation = filters.location.replace(/[(),"%]/g, " ").trim();
+        const cleanLocation = filters.location
+          .replace(/[(),"%;*\\]/g, " ")
+          .trim()
+          .slice(0, 100);
         if (cleanLocation) {
           query = query.ilike("location", `%${cleanLocation}%`);
         }
@@ -707,7 +725,10 @@ export const listingsService = {
 
       // Free-text search — title, description or location
       if (filters.search && filters.search.trim()) {
-        const q = filters.search.replace(/[(),"%]/g, " ").trim();
+        const q = filters.search
+          .replace(/[(),"%;*\\]/g, " ")
+          .trim()
+          .slice(0, 100);
         if (q) {
           query = query.or(
             `title.ilike.%${q}%,description.ilike.%${q}%,location.ilike.%${q}%`,

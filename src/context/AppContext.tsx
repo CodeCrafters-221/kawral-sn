@@ -22,7 +22,8 @@ import {
 	Report,
 } from "../types";
 import { generateUUID, toValidUUID } from "../utils/uuid";
-import { toAppRole } from "../utils/roles";
+import { toAppRole, toSafeRegistrationAppRole } from "../utils/roles";
+import { sanitizeSafeUrl } from "../lib/validation";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type {} from "../data/mockData"; // kept for type completeness
 import { listingsService } from "../services/supabase/listingsService";
@@ -248,9 +249,12 @@ export const AppProvider: React.FC<{
 		setIsLoadingListings(true);
 		if (isSupabaseConfigured()) {
 			try {
+				// SÉCURITÉ : Ne sélectionner que les colonnes publiques d'affichage (sans email ni role)
 				const [{ data: profilesData }, fetchedListings] =
 					await Promise.all([
-						supabase.from("profiles").select("*"),
+						supabase
+							.from("profiles")
+							.select("id, full_name, phone, avatar_url, company_name"),
 						listingsService.fetchListings(),
 					]);
 				const profilesMap: Record<string, any> = {};
@@ -718,36 +722,42 @@ export const AppProvider: React.FC<{
 			} catch {}
 
 			setCurrentUser((prev) => {
-				const roleMapped =
-					prev?.role === "seller" || prev?.role === "admin"
-						? prev.role
-						: pendingOauthRole === "seller"
+				// SÉCURITÉ : Seul le profil en base (profile?.role === "admin") peut conférer le rôle "admin".
+				// user_metadata et localStorage ne peuvent attribuer que "client" ou "seller".
+				const roleMapped: User["role"] =
+					profile?.role === "admin"
+						? "admin"
+						: prev?.id === supabaseUser.id && prev?.role === "seller"
 							? "seller"
-							: toAppRole(
-									profile?.role || supabaseUser.user_metadata?.role,
-								);
+							: pendingOauthRole === "seller"
+								? "seller"
+								: profile?.role
+									? toAppRole(profile.role)
+									: toSafeRegistrationAppRole(
+											supabaseUser.user_metadata?.role,
+										);
 
 				const isRealUrl = (url?: string) =>
 					!!url &&
 					!url.startsWith("data:") &&
-					url.trim() !== "";
+					Boolean(sanitizeSafeUrl(url));
 				const resolvedAvatar = isRealUrl(
 					profile?.avatar_url ?? undefined,
 				)
-					? profile!.avatar_url!
+					? sanitizeSafeUrl(profile!.avatar_url!)
 					: isRealUrl(supabaseUser.user_metadata?.avatar_url)
-						? supabaseUser.user_metadata.avatar_url
+						? sanitizeSafeUrl(supabaseUser.user_metadata.avatar_url)
 						: isRealUrl(prev?.avatar)
-							? prev!.avatar!
+							? sanitizeSafeUrl(prev!.avatar!)
 							: "";
 				const resolvedBanner = isRealUrl(
 					(profile as any)?.banner_url,
 				)
-					? (profile as any).banner_url
+					? sanitizeSafeUrl((profile as any).banner_url)
 					: isRealUrl(supabaseUser.user_metadata?.banner_url)
-						? supabaseUser.user_metadata.banner_url
+						? sanitizeSafeUrl(supabaseUser.user_metadata.banner_url)
 						: isRealUrl(prev?.banner)
-							? prev!.banner!
+							? sanitizeSafeUrl(prev!.banner!)
 							: "";
 
 				const resolvedPhone =
@@ -969,6 +979,11 @@ export const AppProvider: React.FC<{
 			void supabase.auth.signOut();
 			addToast("Mode Visiteur activé (déconnecté)", "info");
 		} else if (currentUser) {
+			// SÉCURITÉ : Interdire strictement l'escalade locale vers admin
+			if (roleKey === "admin" && profile?.role !== "admin") {
+				addToast("Accès refusé : privilèges administrateur requis.", "error");
+				return;
+			}
 			setCurrentUser({
 				...currentUser,
 				role: roleKey as any,
@@ -1056,14 +1071,16 @@ export const AppProvider: React.FC<{
 		details: string,
 	) => {
 		const repId = generateUUID();
+		const cleanTitle = (listingTitle || "").trim().slice(0, 200);
+		const cleanDetails = (details || "").trim().slice(0, 1000);
 		const newReport: Report = {
 			id: repId,
 			listingId,
-			listingTitle,
+			listingTitle: cleanTitle,
 			reporterEmail:
 				currentUser?.email || "signalement@kawral.sn",
 			reason,
-			details,
+			details: cleanDetails,
 			status: "pending",
 			createdAt: new Date().toISOString().split("T")[0],
 		};
@@ -1076,7 +1093,7 @@ export const AppProvider: React.FC<{
 					reporter_email:
 						currentUser?.email || "signalement@kawral.sn",
 					reason,
-					details,
+					details: cleanDetails,
 					status: "pending",
 				});
 			} catch (err) {
@@ -1090,10 +1107,14 @@ export const AppProvider: React.FC<{
 	};
 
 	const dismissReport = async (reportId: string) => {
+		if (currentUser?.role !== "admin" || profile?.role !== "admin") {
+			addToast("Action réservée aux administrateurs.", "error");
+			return;
+		}
 		setReports((prev) => prev.filter((r) => r.id !== reportId));
 		if (isSupabaseConfigured()) {
 			try {
-				await (supabase.from as any)("reports").delete().eq("id", reportId);
+				await (supabase.from as any)("reports").delete().eq("id", toValidUUID(reportId));
 			} catch (err) {
 				console.warn("Report deletion skipped/error:", err);
 			}
