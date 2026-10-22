@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Share2, Heart, Eye, MapPin, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Heart, Eye, Maximize2 } from 'lucide-react';
 import { DotNav } from '../../../../components/marketplace/DotNav';
-import { formatPriceFCFA, getCategoryLabel } from '../../../../utils/formatters';
+import { SafeImage } from '../../../../components/ui';
+import { getCategoryLabel } from '../../../../utils/formatters';
 import type { Listing } from '../../../../types';
 import { ImageLightbox } from './ImageLightbox';
 
@@ -26,7 +27,6 @@ export const ListingHeroGallery: React.FC<ListingHeroGalleryProps> = ({
   favorite,
   userInteracted,
   setUserInteracted,
-  onBack,
   onShare,
   onToggleFavorite,
   onTouchStart,
@@ -45,11 +45,12 @@ export const ListingHeroGallery: React.FC<ListingHeroGalleryProps> = ({
         onTouchEnd={onTouchEnd}
       >
         {/* Image principale : prend 100% de la largeur et de la hauteur sans padding ni dézoom */}
-        <img
+        <SafeImage
           key={activeImageIdx}
           src={listing.images[activeImageIdx]}
           alt={listing.title}
-          className="w-full h-full object-cover select-none transition-transform duration-500 group-hover:scale-[1.02]"
+          className="w-full h-full object-cover block select-none transition-transform duration-500 group-hover:scale-[1.02]"
+          style={{ height: '100%' }}
         />
 
         {/* Dégradé doux et discret pour la lisibilité des badges et boutons */}
@@ -190,7 +191,12 @@ export const ListingHeroGallery: React.FC<ListingHeroGalleryProps> = ({
             }`}
             aria-label={`Afficher la photo ${idx + 1}`}
           >
-            <img src={img} alt="" className="w-full h-full object-cover" />
+            <SafeImage
+              src={img}
+              alt=""
+              className="w-full h-full object-cover block"
+              style={{ height: '100%' }}
+            />
           </button>
         ))}
       </div>

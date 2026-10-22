@@ -10,7 +10,7 @@ import {
   ChevronRight,
   MapPin,
 } from "lucide-react";
-import { Avatar } from "../ui";
+import { Avatar, WhatsAppIcon } from "../ui";
 import type { User } from "../../types";
 
 interface NavbarMobileMenuProps {
@@ -148,6 +148,29 @@ export const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-kawral-green shrink-0 transition-colors" />
           </button>
+
+          <a
+            href="https://chat.whatsapp.com/Bbq6QqEqQMEE5CuN0LWsQy"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="w-full flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/70 text-left transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-9 h-9 rounded-xl bg-[#25D366] flex items-center justify-center text-white shadow-2xs shrink-0">
+                <WhatsAppIcon className="w-4 h-4 fill-current" />
+              </span>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-kawral-dark group-hover:text-kawral-green transition-colors">
+                  Rejoindre la communauté WhatsApp
+                </span>
+                <span className="block text-xs text-kawral-muted truncate">
+                  Échangez et suivez les annonces Kawral en direct
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-emerald-600 shrink-0 transition-colors" />
+          </a>
 
           <button
             type="button"
