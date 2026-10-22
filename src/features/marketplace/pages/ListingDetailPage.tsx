@@ -9,13 +9,14 @@ import { ListingHeroGallery } from "../components/listing-detail/ListingHeroGall
 import { ListingKeyStats } from "../components/listing-detail/ListingKeyStats";
 import { ListingLocationMap } from "../components/listing-detail/ListingLocationMap";
 import { ListingMobileBottomBar } from "../components/listing-detail/ListingMobileBottomBar";
-import { CheckCircle2, ShieldAlert, Shield, Check, Zap, ArrowLeft, ChevronLeft, ChevronRight, Home, MapPin, Tag, KeyRound, PauseCircle } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Shield, Check, Zap, ArrowLeft, ChevronLeft, ChevronRight, Home, MapPin, Tag, KeyRound, PauseCircle, Hash } from "lucide-react";
 import { listingsService } from "../../../services/supabase/listingsService";
 import { ListingCard } from "../../../components/marketplace/ListingCard";
 import { Listing } from "../../../types";
 import { getCategoryLabel } from "../../../utils/formatters";
 import { isAppointmentEligible } from "../../../utils/appointments";
 import { getCharacteristicsForCategory } from "../../../data/characteristicsRegistry";
+import { getListingRef } from "../../../utils/whatsapp";
 
 export const ListingDetailPage: React.FC = () => {
   const {
@@ -206,6 +207,7 @@ export const ListingDetailPage: React.FC = () => {
   const isListingAvailable = listing.status === "published";
   // Rendez-vous uniquement pour l'immobilier et les véhicules si l'annonce est en ligne
   const canBookAppointment = isAppointmentEligible(listing.category) && isListingAvailable;
+  const listingRef = getListingRef(listing.id);
 
   const handleChat = () => {
     if (!currentUser) {
@@ -214,9 +216,13 @@ export const ListingDetailPage: React.FC = () => {
       addToast("Connectez-vous pour contacter le vendeur.", "info");
       return;
     }
+    const origin =
+      typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "https://kawral.sn";
     const convId = startConversation(
       listing,
-      `Bonjour, je vous contacte pour "${listing.title}". Est-elle disponible ?`,
+      `Bonjour, je vous contacte pour "${listing.title}" (Réf: ${listingRef}). Est-elle disponible ?\nLien de l'annonce : ${origin}/listings/${listing.id}`,
     );
     if (convId) {
       setCurrentView("messaging");
@@ -402,11 +408,19 @@ export const ListingDetailPage: React.FC = () => {
                     <span className="font-bold text-[10px] sm:text-xs text-kawral-orange uppercase tracking-wider block">
                       {getCategoryLabel(listing.category)}
                     </span>
-                    {listing.category === "other" && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-kawral-green font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200">
-                        Prix unique
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {listingRef && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] sm:text-xs border border-slate-200">
+                          <Hash className="w-3 h-3 text-kawral-green shrink-0" />
+                          <span>Réf : {listingRef}</span>
+                        </span>
+                      )}
+                      {listing.category === "other" && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-kawral-green font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200">
+                          Prix unique
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <h1 className="text-base sm:text-2xl font-extrabold text-kawral-dark leading-snug break-words [overflow-wrap:anywhere]">
                     {listing.title}

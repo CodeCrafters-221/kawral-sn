@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Phone, MessageSquare, Calendar, CheckCircle2, Shield } from 'lucide-react';
 import { Listing } from '../../types';
 import { WhatsAppIcon } from '../ui';
-import { buildWhatsAppUrl } from '../../utils/whatsapp';
+import { buildWhatsAppUrl, getListingRef } from '../../utils/whatsapp';
 
 const QUICK_MESSAGES = ['Toujours disponible ?', 'Je veux visiter.', 'Négociable ?'];
 
@@ -27,6 +27,7 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
 
   const ownerLabel =
     listing.owner.type === 'owner' ? 'Propriétaire' : 'Vendeur';
+  const listingRef = getListingRef(listing.id);
 
   return (
     <div className="bg-white rounded-3xl border border-kawral-border overflow-hidden shadow-lg">
@@ -52,9 +53,16 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
             {listing.owner.verified && <CheckCircle2 className="w-3.5 h-3.5 text-kawral-green shrink-0" />}
           </div>
           <p className="text-[11px] text-kawral-muted font-medium">{ownerLabel}</p>
-          <div className="flex items-center gap-1 mt-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-[10px] font-bold text-emerald-600">Répond en moins de 2h</span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+              <span className="text-[10px] font-bold text-emerald-600">Répond en moins de 2h</span>
+            </div>
+            {listingRef && (
+              <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                Réf : {listingRef}
+              </span>
+            )}
           </div>
         </div>
 

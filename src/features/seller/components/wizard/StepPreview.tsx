@@ -1,6 +1,7 @@
 import React from "react";
-import { CheckCircle2, Mic } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { AudioPlayer } from "../../../../components/ui/AudioPlayer";
+import { SafeImage } from "../../../../components/ui/SafeImage";
 
 import { TransactionType } from "../../../../types";
 
@@ -38,13 +39,14 @@ export const StepPreview: React.FC<Props> = ({
     </div>
 
     <div className="border border-kawral-border rounded-2xl overflow-hidden bg-kawral-ivory p-4 sm:p-5 space-y-4">
-      {images[0] && (
-        <img
+      <div className="w-full h-52 sm:h-64 rounded-xl overflow-hidden bg-slate-100 shadow-xs shrink-0">
+        <SafeImage
           src={images[0]}
-          alt=""
-          className="w-full h-48 sm:h-64 object-cover rounded-xl shadow-xs"
+          alt={title || "Aperçu de l'annonce"}
+          className="w-full h-full object-cover block"
+          style={{ height: "100%" }}
         />
-      )}
+      </div>
 
       <div className="min-w-0">
         <h3

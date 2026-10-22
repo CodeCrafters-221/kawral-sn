@@ -1,4 +1,12 @@
 /**
+ * Returns the standardized short reference for a listing (first 8 characters of its ID).
+ */
+export function getListingRef(listingId?: string | null): string {
+  if (!listingId || typeof listingId !== "string") return "";
+  return listingId.slice(0, 8);
+}
+
+/**
  * Helper to build a direct WhatsApp chat URL for contacting a listing publisher.
  * Handles Senegalese and international phone numbers format.
  */
@@ -36,13 +44,21 @@ export function buildWhatsAppUrl(
     message += ` au sujet de votre annonce "${listingTitle}"`;
   }
   if (listingId) {
-    message += ` (Réf: ${listingId.slice(0, 8)})`;
+    message += ` (Réf: ${getListingRef(listingId)})`;
   }
 
   if (customMessage && customMessage.trim()) {
     message += `. ${customMessage.trim()}`;
   } else {
     message += ". Est-elle toujours disponible ?";
+  }
+
+  if (listingId) {
+    const origin =
+      typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "https://kawral.sn";
+    message += `\n\nLien de l'annonce : ${origin}/listings/${listingId}`;
   }
 
   return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;

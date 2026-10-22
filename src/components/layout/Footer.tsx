@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { KawralLogo } from './KawralLogo';
+import { WhatsAppIcon } from '../ui';
 import {
   MapPin,
   Mail,
@@ -166,6 +167,17 @@ export const Footer: React.FC = () => {
                 <button onClick={() => setCurrentView('search')} className="hover:text-white transition-colors cursor-pointer">
                   Recherche & Filtres avancés
                 </button>
+              </li>
+              <li className="pt-0.5">
+                <a
+                  href="https://chat.whatsapp.com/Bbq6QqEqQMEE5CuN0LWsQy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors font-semibold text-[#25D366] cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <WhatsAppIcon className="w-4 h-4 fill-current shrink-0" />
+                  <span>Rejoindre la communauté WhatsApp</span>
+                </a>
               </li>
             </ul>
           </div>

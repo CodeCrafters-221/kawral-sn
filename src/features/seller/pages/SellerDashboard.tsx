@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { formatPriceFCFA } from "../../../utils/formatters";
+import { getListingRef } from "../../../utils/whatsapp";
 import {
 	PlusCircle,
 	Eye,
@@ -14,6 +15,7 @@ import {
 	Building2,
 	Calendar,
 	Clock,
+	Hash,
 } from "lucide-react";
 import {
 	Avatar,
@@ -448,92 +450,100 @@ export const SellerDashboard: React.FC = () => {
 									</td>
 								</tr>
 							) : (
-								sellerListings.map((item) => (
-									<tr
-										key={item.id}
-										className="hover:bg-slate-50 transition-colors"
-									>
-										<td className="p-4 flex items-center gap-3">
-											<img
-												src={item.images[0] || ""}
-												alt=""
-												onError={(e) => {
-													(
-														e.target as HTMLImageElement
-													).src =
-														"https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
-												}}
-												className="w-12 h-12 rounded-xl object-cover shrink-0"
-											/>
-											<div className="min-w-0 max-w-xs sm:max-w-md">
-												<h4
-													title={item.title}
-													className="font-bold text-sm text-kawral-dark line-clamp-2 break-words [overflow-wrap:anywhere]"
+								sellerListings.map((item) => {
+									const ref = getListingRef(item.id);
+									return (
+										<tr
+											key={item.id}
+											className="hover:bg-slate-50 transition-colors"
+										>
+											<td className="p-4 flex items-center gap-3">
+												<div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/70">
+													<SafeImage
+														src={item.images[0]}
+														alt={item.title}
+														className="w-full h-full object-cover block"
+														style={{ height: "100%" }}
+													/>
+												</div>
+												<div className="min-w-0 max-w-xs sm:max-w-md space-y-1">
+													<h4
+														title={item.title}
+														className="font-bold text-sm text-kawral-dark line-clamp-2 break-words [overflow-wrap:anywhere]"
+													>
+														{item.title}
+													</h4>
+													<div className="flex items-center gap-2 flex-wrap">
+														{ref && (
+															<span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] border border-slate-200 shrink-0">
+																<Hash className="w-2.5 h-2.5 text-kawral-green" />
+																<span>Réf: {ref}</span>
+															</span>
+														)}
+														<p className="text-[11px] text-kawral-muted truncate">
+															{item.location.neighborhood},{" "}
+															{item.location.city}
+														</p>
+													</div>
+												</div>
+											</td>
+
+											<td className="p-4 font-bold text-kawral-green">
+												{formatPriceFCFA(item.price)}
+											</td>
+
+											<td className="p-4">
+												<ListingStatusSelect
+													value={item.status}
+													allowRented={item.transactionType === "rent"}
+													onChange={(status) =>
+														updateListingStatus(item.id, status)
+													}
+												/>
+											</td>
+
+											<td className="p-4 font-bold text-kawral-dark">
+												{item.views}
+											</td>
+
+											<td className="p-4 text-kawral-muted">
+												{item.createdAt}
+											</td>
+
+											<td className="p-4 text-right space-x-1 sm:space-x-2">
+												<button
+													onClick={() =>
+														navigate(`/listings/${item.id}`)
+													}
+													className="p-1.5 text-slate-450 hover:text-kawral-green cursor-pointer inline-flex"
+													title="Voir l'annonce"
 												>
-													{item.title}
-												</h4>
-												<p className="text-[11px] text-kawral-muted truncate">
-													{item.location.neighborhood},{" "}
-													{item.location.city}
-												</p>
-											</div>
-										</td>
+													<Eye className="w-4 h-4" />
+												</button>
 
-										<td className="p-4 font-bold text-kawral-green">
-											{formatPriceFCFA(item.price)}
-										</td>
+												<button
+													onClick={() =>
+														navigate(
+															`/dashboard/seller/listings/${item.id}/edit`,
+														)
+													}
+													className="p-1.5 text-slate-450 hover:text-kawral-orange cursor-pointer inline-flex"
+													title="Modifier"
+												>
+													<Edit3 className="w-4 h-4" />
+												</button>
 
-										<td className="p-4">
-											<ListingStatusSelect
-												value={item.status}
-												allowRented={item.transactionType === "rent"}
-												onChange={(status) =>
-													updateListingStatus(item.id, status)
-												}
-											/>
-										</td>
-
-										<td className="p-4 font-bold text-kawral-dark">
-											{item.views}
-										</td>
-
-										<td className="p-4 text-kawral-muted">
-											{item.createdAt}
-										</td>
-
-										<td className="p-4 text-right space-x-1 sm:space-x-2">
-											<button
-												onClick={() =>
-													navigate(`/listings/${item.id}`)
-												}
-												className="p-1.5 text-slate-450 hover:text-kawral-green cursor-pointer inline-flex"
-												title="Voir l'annonce"
-											>
-												<Eye className="w-4 h-4" />
-											</button>
-
-											<button
-												onClick={() =>
-													navigate(
-														`/dashboard/seller/listings/${item.id}/edit`,
-													)
-												}
-												className="p-1.5 text-slate-450 hover:text-kawral-orange cursor-pointer inline-flex"
-												title="Modifier"
-											>
-												<Edit3 className="w-4 h-4" />
-											</button>
-
-											<button
-												onClick={() => setListingToDelete(item)}
-												className="p-1.5 text-rose-500 hover:text-rose-700 cursor-pointer inline-flex"
-												title="Supprimer"
-											>
-												<Trash2 className="w-4 h-4" />
-											</button>
-										</td>
-									</tr>
-								))
+												<button
+													onClick={() => setListingToDelete(item)}
+													className="p-1.5 text-rose-500 hover:text-rose-700 cursor-pointer inline-flex"
+													title="Supprimer"
+												>
+													<Trash2 className="w-4 h-4" />
+												</button>
+											</td>
+										</tr>
+									);
+								})
 							)}
 						</tbody>
 					</table>
@@ -557,93 +567,103 @@ export const SellerDashboard: React.FC = () => {
 							</p>
 						</div>
 					) : (
-						sellerListings.map((item) => (
-							<div
-								key={`mobile-${item.id}`}
-								className="p-4 flex flex-col gap-4"
-							>
-								<div className="flex items-start gap-3">
-									<img
-										src={item.images[0] || ""}
-										alt=""
-										onError={(e) => {
-											(e.target as HTMLImageElement).src =
-												"https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
-										}}
-										className="w-16 h-16 rounded-xl object-cover shrink-0"
-									/>
-									<div className="min-w-0 flex-1">
-										<h4
-											title={item.title}
-											className="font-bold text-sm text-kawral-dark line-clamp-3 break-words [overflow-wrap:anywhere]"
-										>
-											{item.title}
-										</h4>
-										<p className="text-xs font-black text-kawral-green mt-1">
-											{formatPriceFCFA(item.price)}
-										</p>
-										<p className="text-[11px] text-kawral-muted mt-0.5 truncate">
-											{item.location.neighborhood},{" "}
-											{item.location.city}
-										</p>
+						sellerListings.map((item) => {
+							const ref = getListingRef(item.id);
+							return (
+								<div
+									key={`mobile-${item.id}`}
+									className="p-4 flex flex-col gap-4"
+								>
+									<div className="flex items-start gap-3">
+										<div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/70">
+											<SafeImage
+												src={item.images[0]}
+												alt={item.title}
+												className="w-full h-full object-cover block"
+												style={{ height: "100%" }}
+											/>
+										</div>
+										<div className="min-w-0 flex-1">
+											<h4
+												title={item.title}
+												className="font-bold text-sm text-kawral-dark line-clamp-2 break-words [overflow-wrap:anywhere]"
+											>
+												{item.title}
+											</h4>
+											<div className="flex items-center gap-2 flex-wrap mt-1">
+												<p className="text-xs font-black text-kawral-green">
+													{formatPriceFCFA(item.price)}
+												</p>
+												{ref && (
+													<span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px] border border-slate-200 shrink-0">
+														<Hash className="w-2.5 h-2.5 text-kawral-green" />
+														<span>Réf: {ref}</span>
+													</span>
+												)}
+											</div>
+											<p className="text-[11px] text-kawral-muted mt-1 truncate">
+												{item.location.neighborhood},{" "}
+												{item.location.city}
+											</p>
+										</div>
 									</div>
-								</div>
 
-								<div className="flex items-center justify-between gap-3">
-									<span className="text-[11px] font-bold uppercase tracking-wider text-kawral-muted shrink-0">
-										Statut
-									</span>
-									<ListingStatusSelect
-										value={item.status}
-										allowRented={item.transactionType === "rent"}
-										onChange={(status) =>
-											updateListingStatus(item.id, status)
-										}
-										className="w-[188px] xs:w-[204px]"
-									/>
-								</div>
+									<div className="flex items-center justify-between gap-3">
+										<span className="text-[11px] font-bold uppercase tracking-wider text-kawral-muted shrink-0">
+											Statut
+										</span>
+										<ListingStatusSelect
+											value={item.status}
+											allowRented={item.transactionType === "rent"}
+											onChange={(status) =>
+												updateListingStatus(item.id, status)
+											}
+											className="w-[188px] xs:w-[204px]"
+										/>
+									</div>
 
-								<div className="flex items-center justify-between pt-3 border-t border-slate-100">
-									<div className="flex items-center gap-4 text-[11px] text-kawral-muted font-bold">
-										<span className="flex items-center gap-1.5">
-											<Eye className="w-3.5 h-3.5" />{" "}
-											{item.views} vues
-										</span>
-										<span className="flex items-center gap-1.5">
-											<Calendar className="w-3.5 h-3.5" />{" "}
-											{item.createdAt}
-										</span>
-									</div>
-									<div className="flex items-center gap-2">
-										<button
-											onClick={() =>
-												navigate(`/listings/${item.id}`)
-											}
-											className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg cursor-pointer"
-										>
-											<Eye className="w-4 h-4" />
-										</button>
-										<button
-											onClick={() =>
-												navigate(
-													`/dashboard/seller/listings/${item.id}/edit`,
-												)
-											}
-											className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg cursor-pointer"
-										>
-											<Edit3 className="w-4 h-4" />
-										</button>
-										<button
-											onClick={() => setListingToDelete(item)}
-											className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg cursor-pointer"
-											title="Supprimer"
-										>
-											<Trash2 className="w-4 h-4" />
-										</button>
+									<div className="flex items-center justify-between pt-3 border-t border-slate-100">
+										<div className="flex items-center gap-4 text-[11px] text-kawral-muted font-bold">
+											<span className="flex items-center gap-1.5">
+												<Eye className="w-3.5 h-3.5" />{" "}
+												{item.views} vues
+											</span>
+											<span className="flex items-center gap-1.5">
+												<Calendar className="w-3.5 h-3.5" />{" "}
+												{item.createdAt}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<button
+												onClick={() =>
+													navigate(`/listings/${item.id}`)
+												}
+												className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg cursor-pointer"
+											>
+												<Eye className="w-4 h-4" />
+											</button>
+											<button
+												onClick={() =>
+													navigate(
+														`/dashboard/seller/listings/${item.id}/edit`,
+													)
+												}
+												className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg cursor-pointer"
+											>
+												<Edit3 className="w-4 h-4" />
+											</button>
+											<button
+												onClick={() => setListingToDelete(item)}
+												className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg cursor-pointer"
+												title="Supprimer"
+											>
+												<Trash2 className="w-4 h-4" />
+											</button>
+										</div>
 									</div>
 								</div>
-							</div>
-						))
+							);
+						})
 					)}
 				</div>
 			</Card>

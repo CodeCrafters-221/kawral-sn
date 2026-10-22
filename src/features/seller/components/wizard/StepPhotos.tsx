@@ -215,7 +215,7 @@ export const StepPhotos: React.FC<Props> = ({
               return (
                 <div
                   key={idx}
-                  className={`relative h-32 rounded-2xl overflow-hidden border transition-all ${
+                  className={`relative h-32 sm:h-36 rounded-2xl overflow-hidden border bg-slate-100 transition-all ${
                     isCover
                       ? "ring-4 ring-amber-400 border-transparent shadow-md"
                       : "border-slate-200"
@@ -224,7 +224,8 @@ export const StepPhotos: React.FC<Props> = ({
                   <img
                     src={img}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover block"
+                    style={{ height: "100%" }}
                   />
 
                   {/* Overlay Actions */}

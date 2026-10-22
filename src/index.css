@@ -92,6 +92,11 @@
     color: var(--foreground);
     font-family: var(--font-sans);
   }
+  /* Image optimization on mobile — inside @layer base so Tailwind h-* utilities take precedence */
+  img:not([style*="height"]) {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* ── Mobile-First Optimizations ── */
@@ -272,13 +277,6 @@ a,
   word-break: break-word;
 }
 
-/* ── Image optimization on mobile (prevent content shift) ── */
-/* Do NOT apply height:auto globally — it overrides inline pixel heights on logos */
-img:not([style*="height"]) {
-  max-width: 100%;
-  height: auto;
-}
-
 /* ── Fix iOS 100vh bug for full screen sections ── */
 @supports (-webkit-touch-callout: none) {
   .h-screen {
@@ -288,4 +286,3 @@ img:not([style*="height"]) {
     min-height: -webkit-fill-available;
   }
 }
-
