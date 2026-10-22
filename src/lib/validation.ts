@@ -2,6 +2,44 @@ import { z } from 'zod';
 
 /* ── Helpers réutilisables ───────────────────────────────────── */
 
+/**
+ * Vérifie et nettoie une URL de média (image, audio, avatar) afin de bloquer
+ * tout vecteur XSS (ex: javascript:, data:text/html, vbscript:).
+ * Autorise uniquement https://, http://, blob: (prévisualisation locale) ou chemin relatif '/'.
+ */
+export function sanitizeSafeUrl(url: unknown): string {
+  if (typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed || trimmed.length > 2048) return '';
+  if (trimmed.startsWith('/')) {
+    // Empêcher les protocol-relative URLs arbitraires "//evil.com" si non attendues
+    return trimmed.startsWith('//') ? '' : trimmed;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (
+      parsed.protocol === 'https:' ||
+      parsed.protocol === 'http:' ||
+      parsed.protocol === 'blob:'
+    ) {
+      return trimmed;
+    }
+    return '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Filtre un tableau d'URLs pour ne conserver que les URLs sûres.
+ */
+export function sanitizeSafeUrlList(urls: unknown): string[] {
+  if (!Array.isArray(urls)) return [];
+  return urls
+    .map((u) => sanitizeSafeUrl(u))
+    .filter((u): u is string => u.length > 0);
+}
+
 /** Numéro sénégalais : +221 7x xxx xx xx ou 7x xxx xx xx */
 export const senegalPhone = z
   .string()

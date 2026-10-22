@@ -7,7 +7,47 @@ import { createServer as createViteServer } from "vite";
 const app = express();
 const PORT = 3000;
 
-app.use(express.json({ limit: "10mb" }));
+app.disable("x-powered-by");
+
+// En-têtes de sécurité HTTP
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), geolocation=(self), microphone=(self), payment=()"
+  );
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=63072000; includeSubDomains; preload"
+    );
+  }
+  next();
+});
+
+// Limite stricte de taille JSON (100 Ko) contre les attaques par saturation mémoire
+app.use(express.json({ limit: "100kb" }));
+
+// Rate limiter en mémoire par IP pour l'endpoint DNS /api/auth/validate-email
+const emailRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = emailRateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    emailRateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+  entry.count += 1;
+  return true;
+}
 
 // Health check — GET /api/health
 app.get("/api/health", (_req, res) => {
@@ -51,15 +91,30 @@ const COMMON_TYPO_DOMAINS: Record<string, string> = {
   "icoud.com": "icloud.com",
 };
 
+const HOSTNAME_REGEX = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+
 // Endpoint de validation de l'existence réelle d'un email (format, domaines jetables, DNS MX)
 app.post("/api/auth/validate-email", async (req, res) => {
   try {
+    const clientIp =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.socket.remoteAddress ||
+      "unknown";
+
+    if (!checkRateLimit(clientIp)) {
+      return res.status(429).json({
+        valid: false,
+        error: "RATE_LIMIT_EXCEEDED",
+        message: "Trop de tentatives de vérification. Veuillez patienter une minute.",
+      });
+    }
+
     const { email } = req.body || {};
-    if (!email || typeof email !== "string") {
+    if (!email || typeof email !== "string" || email.length > 254) {
       return res.status(400).json({
         valid: false,
         error: "EMAIL_REQUIRED",
-        message: "L'adresse email est requise.",
+        message: "L'adresse email est requise et ne doit pas dépasser 254 caractères.",
       });
     }
 
@@ -76,11 +131,20 @@ app.post("/api/auth/validate-email", async (req, res) => {
     const [user, domain] = parts;
 
     // Nom d'utilisateur trop court ou caractère invalide
-    if (user.length < 2) {
+    if (user.length < 2 || user.length > 64) {
       return res.status(400).json({
         valid: false,
         error: "INVALID_LOCAL_PART",
         message: "L'identifiant avant le @ doit contenir au moins 2 caractères.",
+      });
+    }
+
+    // Validation stricte du nom de domaine avant toute résolution DNS
+    if (!HOSTNAME_REGEX.test(domain)) {
+      return res.status(400).json({
+        valid: false,
+        error: "INVALID_DOMAIN",
+        message: "Le nom de domaine de l'adresse email est invalide.",
       });
     }
 
@@ -158,7 +222,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

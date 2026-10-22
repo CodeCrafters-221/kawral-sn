@@ -9,8 +9,10 @@ import {
 } from "../../types";
 import {
 	toValidUUID,
-	generateUUID,
+	isUUID,
 } from "../../utils/uuid";
+
+const MAX_MESSAGE_LENGTH = 2000;
 
 export const messagesService = {
 	/**
@@ -22,7 +24,7 @@ export const messagesService = {
 		conversationId?: string,
 		currentUserId?: string,
 	) {
-		if (!isSupabaseConfigured()) {
+		if (!isSupabaseConfigured() || (!currentUserId && !conversationId)) {
 			return { conversations: [], messages: {} };
 		}
 
@@ -31,26 +33,50 @@ export const messagesService = {
 				"conversations",
 			)
 				.select("*")
-				.order("updated_at", { ascending: false });
+				.order("updated_at", { ascending: false })
+				.limit(200);
+
 			if (conversationId) {
+				const validConvId = toValidUUID(conversationId);
 				conversationsQuery = conversationsQuery.eq(
 					"id",
-					conversationId,
+					validConvId,
+				);
+			} else if (currentUserId && isUUID(currentUserId)) {
+				conversationsQuery = conversationsQuery.or(
+					`buyer_id.eq.${currentUserId},seller_id.eq.${currentUserId}`,
 				);
 			}
+
 			const { data: convsData, error: conversationsError } =
 				await conversationsQuery;
 			if (conversationsError) throw conversationsError;
 
+			const convIds: string[] = (convsData || [])
+				.map((c: any) => c.id)
+				.filter((id: string) => isUUID(id));
+
+			if (convIds.length === 0) {
+				return { conversations: [], messages: {} };
+			}
+
 			let messagesQuery = (supabase.from as any)("messages")
 				.select("*")
-				.order("created_at", { ascending: true });
+				.order("created_at", { ascending: true })
+				.limit(500);
+
 			if (conversationId) {
 				messagesQuery = messagesQuery.eq(
 					"conversation_id",
-					conversationId,
+					toValidUUID(conversationId),
+				);
+			} else {
+				messagesQuery = messagesQuery.in(
+					"conversation_id",
+					convIds,
 				);
 			}
+
 			const { data: msgsData, error: messagesError } =
 				await messagesQuery;
 			if (messagesError) throw messagesError;
@@ -161,6 +187,9 @@ export const messagesService = {
 		text: string,
 	): Promise<boolean> {
 		if (!isSupabaseConfigured()) return true;
+		const cleanText = (text || "").trim().slice(0, MAX_MESSAGE_LENGTH);
+		if (!cleanText) return false;
+
 		try {
 			const convUuid = toValidUUID(conversationId);
 			const senderUuid = toValidUUID(senderId);
@@ -168,10 +197,10 @@ export const messagesService = {
 			const { error: messageError } = await (
 				supabase.from as any
 			)("messages").insert({
-				id: msgId,
+				id: toValidUUID(msgId),
 				conversation_id: convUuid,
 				sender_id: senderUuid,
-				content: text,
+				content: cleanText,
 			});
 
 			if (messageError) throw messageError;
@@ -216,10 +245,13 @@ export const messagesService = {
 		newText: string,
 	): Promise<boolean> {
 		if (!isSupabaseConfigured()) return true;
+		const cleanText = (newText || "").trim().slice(0, MAX_MESSAGE_LENGTH);
+		if (!cleanText) return false;
+
 		try {
 			const { error } = await (supabase.from as any)("messages")
 				.update({
-					content: newText,
+					content: cleanText,
 					updated_at: new Date().toISOString(),
 				})
 				.eq("id", toValidUUID(messageId));
@@ -281,6 +313,9 @@ export const messagesService = {
 			const listingUuid = toValidUUID(listingId);
 			const buyerUuid = toValidUUID(buyerId);
 			const sellerUuid = toValidUUID(sellerId);
+			const cleanInitial = (initialMessage || "")
+				.trim()
+				.slice(0, MAX_MESSAGE_LENGTH);
 
 			await (supabase.from as any)("conversations").insert({
 				id: convUuid,
@@ -289,12 +324,12 @@ export const messagesService = {
 				seller_id: sellerUuid,
 			});
 
-			if (initialMessage.trim()) {
+			if (cleanInitial) {
 				await (supabase.from as any)("messages").insert({
-					id: firstMsgId,
+					id: toValidUUID(firstMsgId),
 					conversation_id: convUuid,
 					sender_id: buyerUuid,
-					content: initialMessage,
+					content: cleanInitial,
 				});
 			}
 		} catch (err) {

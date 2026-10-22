@@ -74,13 +74,16 @@ export const ListingDetailPage: React.FC = () => {
   const isOwner = !!(currentUser && listing && currentUser.id === listing.ownerId);
 
   useEffect(() => {
-    if (listing?.id) {
-      // Pour être sûr à 100% que tu vois le compteur bouger pendant tes tests,
-      // j'ai retiré toutes les restrictions (sessionStorage, propriétaire).
-      // À CHAQUE fois que la page charge, la vue est incrémentée.
-      listingsService.incrementViews(listing.id);
+    if (!listing?.id || isOwner) return;
+    const viewedKey = `kawral_viewed_${listing.id}`;
+    try {
+      if (sessionStorage.getItem(viewedKey)) return;
+      sessionStorage.setItem(viewedKey, "1");
+    } catch {
+      // sessionStorage indisponible (mode privé strict)
     }
-  }, [listing?.id]);
+    listingsService.incrementViews(listing.id);
+  }, [listing?.id, isOwner]);
 
   const [similarListings, setSimilarListings] = useState<Listing[]>([]);
   const [similarPage, setSimilarPage] = useState(1);
