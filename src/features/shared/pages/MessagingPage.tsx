@@ -424,6 +424,18 @@ export const MessagingPage: React.FC = () => {
 										})
 									: "";
 
+								const interlocutorName =
+									currentUser.id === activeConv.sellerId
+										? activeConv.buyerName
+										: activeConv.sellerName;
+								const displaySenderName =
+									msg.senderName &&
+									msg.senderName !== "Utilisateur" &&
+									msg.senderName !== "Client" &&
+									msg.senderName !== "Vendeur"
+										? msg.senderName
+										: interlocutorName || msg.senderName;
+
 								return (
 									<div
 										key={msg.id}
@@ -522,7 +534,7 @@ export const MessagingPage: React.FC = () => {
 												<div className="px-3.5 py-2.5">
 													{!isMe && (
 														<span className="block text-[10px] font-extrabold text-kawral-green mb-0.5 truncate">
-															{msg.senderName}
+															{displaySenderName}
 														</span>
 													)}
 													<p className="font-normal text-xs sm:text-[13px] leading-relaxed break-words whitespace-pre-wrap">

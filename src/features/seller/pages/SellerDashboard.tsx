@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { formatPriceFCFA } from "../../../utils/formatters";
@@ -16,6 +16,8 @@ import {
 	Calendar,
 	Clock,
 	Hash,
+	ChevronLeft,
+	ChevronRight,
 } from "lucide-react";
 import {
 	Avatar,
@@ -55,7 +57,10 @@ export const SellerDashboard: React.FC = () => {
 	const [listingToDelete, setListingToDelete] =
 		useState<Listing | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
+	const LISTINGS_PER_PAGE = 5;
 	const bannerInputRef = useRef<HTMLInputElement>(null);
+	const listingsSectionRef = useRef<HTMLDivElement>(null);
 
 	const handleConfirmDelete = async () => {
 		if (!listingToDelete) return;
@@ -108,6 +113,32 @@ export const SellerDashboard: React.FC = () => {
 	const soldListings = sellerListings.filter(
 		(item) => item.status === "sold",
 	).length;
+
+	const totalPages = Math.max(
+		1,
+		Math.ceil(sellerListings.length / LISTINGS_PER_PAGE),
+	);
+	const safeCurrentPage = Math.min(currentPage, totalPages);
+	const startIndex = (safeCurrentPage - 1) * LISTINGS_PER_PAGE;
+	const paginatedSellerListings = sellerListings.slice(
+		startIndex,
+		startIndex + LISTINGS_PER_PAGE,
+	);
+
+	useEffect(() => {
+		if (currentPage > totalPages) {
+			setCurrentPage(totalPages);
+		}
+	}, [currentPage, totalPages]);
+
+	const handlePageChange = (page: number) => {
+		const nextPage = Math.max(1, Math.min(totalPages, page));
+		setCurrentPage(nextPage);
+		listingsSectionRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "nearest",
+		});
+	};
 
 	// Le changement de statut (avec toast de confirmation / d'erreur) est géré par le contexte
 
@@ -391,6 +422,7 @@ export const SellerDashboard: React.FC = () => {
 
 
 			{/* Seller Listings Table using Card */}
+			<div ref={listingsSectionRef}>
 			<Card className="overflow-hidden shadow-xs">
 				<CardHeader className="p-4 sm:p-6 border-b border-slate-100 flex flex-row flex-wrap items-center justify-between gap-2">
 					<CardTitle>
@@ -450,7 +482,7 @@ export const SellerDashboard: React.FC = () => {
 									</td>
 								</tr>
 							) : (
-								sellerListings.map((item) => {
+								paginatedSellerListings.map((item) => {
 									const ref = getListingRef(item.id);
 									return (
 										<tr
@@ -567,7 +599,7 @@ export const SellerDashboard: React.FC = () => {
 							</p>
 						</div>
 					) : (
-						sellerListings.map((item) => {
+						paginatedSellerListings.map((item) => {
 							const ref = getListingRef(item.id);
 							return (
 								<div
@@ -666,7 +698,80 @@ export const SellerDashboard: React.FC = () => {
 						})
 					)}
 				</div>
+
+				{/* Barre de pagination responsive (Desktop & Mobile) */}
+				{!isLoadingListings && sellerListings.length > LISTINGS_PER_PAGE && (
+					<div className="px-4 py-3.5 sm:px-6 sm:py-4 bg-kawral-ivory/60 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+						<p className="text-[11px] sm:text-xs font-semibold text-kawral-muted text-center sm:text-left">
+							Affichage de{" "}
+							<span className="font-extrabold text-kawral-dark">
+								{startIndex + 1}
+							</span>{" "}
+							à{" "}
+							<span className="font-extrabold text-kawral-dark">
+								{Math.min(
+									startIndex + LISTINGS_PER_PAGE,
+									sellerListings.length,
+								)}
+							</span>{" "}
+							sur{" "}
+							<span className="font-extrabold text-kawral-green">
+								{sellerListings.length}
+							</span>{" "}
+							annonces
+						</p>
+
+						<nav
+							className="flex items-center gap-1.5 flex-wrap justify-center"
+							aria-label="Pagination de vos annonces"
+						>
+							<button
+								type="button"
+								onClick={() => handlePageChange(safeCurrentPage - 1)}
+								disabled={safeCurrentPage === 1}
+								aria-label="Page précédente"
+								className="h-9 px-2.5 sm:px-3 inline-flex items-center gap-1 rounded-xl border border-kawral-border bg-white text-xs font-bold text-kawral-dark hover:bg-kawral-ivory disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+							>
+								<ChevronLeft className="w-4 h-4" />
+								<span className="hidden xs:inline">Précédent</span>
+							</button>
+
+							{Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+								(page) => (
+									<button
+										key={page}
+										type="button"
+										onClick={() => handlePageChange(page)}
+										aria-label={`Page ${page}`}
+										aria-current={
+											safeCurrentPage === page ? "page" : undefined
+										}
+										className={`w-9 h-9 rounded-xl border text-xs font-extrabold transition-colors cursor-pointer ${
+											safeCurrentPage === page
+												? "bg-kawral-green text-white border-kawral-green shadow-xs"
+												: "bg-white text-kawral-dark border-kawral-border hover:bg-kawral-ivory"
+										}`}
+									>
+										{page}
+									</button>
+								),
+							)}
+
+							<button
+								type="button"
+								onClick={() => handlePageChange(safeCurrentPage + 1)}
+								disabled={safeCurrentPage === totalPages}
+								aria-label="Page suivante"
+								className="h-9 px-2.5 sm:px-3 inline-flex items-center gap-1 rounded-xl border border-kawral-border bg-white text-xs font-bold text-kawral-dark hover:bg-kawral-ivory disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+							>
+								<span className="hidden xs:inline">Suivant</span>
+								<ChevronRight className="w-4 h-4" />
+							</button>
+						</nav>
+					</div>
+				)}
 			</Card>
+			</div>
 
 			{/* Modal de confirmation de suppression */}
 			<DeleteListingModal
