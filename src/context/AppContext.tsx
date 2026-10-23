@@ -254,7 +254,7 @@ export const AppProvider: React.FC<{
 					await Promise.all([
 						supabase
 							.from("profiles")
-							.select("id, full_name, phone, avatar_url, company_name"),
+							.select("id, full_name, phone, avatar_url"),
 						listingsService.fetchListings(),
 					]);
 				const profilesMap: Record<string, any> = {};
@@ -375,12 +375,24 @@ export const AppProvider: React.FC<{
 			if (payload.eventType === "INSERT") {
 				const senderProfile =
 					profilesRef.current[row.sender_id];
+				const matchedConv = conversations.find(
+					(c) => c.id === row.conversation_id,
+				);
+				const resolvedSenderName =
+					senderProfile?.full_name ||
+					(matchedConv
+						? row.sender_id === matchedConv.sellerId
+							? matchedConv.sellerName
+							: row.sender_id === matchedConv.buyerId
+								? matchedConv.buyerName
+								: undefined
+						: undefined) ||
+					"Utilisateur";
 				const message: Message = {
 					id: row.id,
 					conversationId: row.conversation_id,
 					senderId: row.sender_id,
-					senderName:
-						senderProfile?.full_name || "Utilisateur",
+					senderName: resolvedSenderName,
 					text: row.content,
 					createdAt: row.created_at,
 				};
@@ -606,12 +618,24 @@ export const AppProvider: React.FC<{
 			}
 			const senderProfile =
 				profilesRef.current[row.sender_id];
+			const matchedConv = conversations.find(
+				(c) => c.id === row.conversation_id,
+			);
+			const resolvedSenderName =
+				senderProfile?.full_name ||
+				(matchedConv
+					? row.sender_id === matchedConv.sellerId
+						? matchedConv.sellerName
+						: row.sender_id === matchedConv.buyerId
+							? matchedConv.buyerName
+							: undefined
+					: undefined) ||
+				"Utilisateur";
 			const message: Message = {
 				id: row.id,
 				conversationId: row.conversation_id,
 				senderId: row.sender_id,
-				senderName:
-					senderProfile?.full_name || "Utilisateur",
+				senderName: resolvedSenderName,
 				text: row.content,
 				createdAt: row.created_at,
 			};

@@ -81,6 +81,38 @@ export const messagesService = {
 				await messagesQuery;
 			if (messagesError) throw messagesError;
 
+			// S'assurer que tous les profils des participants (acheteurs, vendeurs, expéditeurs) sont chargés
+			const participantIds = new Set<string>();
+			(convsData || []).forEach((c: any) => {
+				if (c.buyer_id && isUUID(c.buyer_id) && !profilesMap[c.buyer_id]?.full_name) {
+					participantIds.add(c.buyer_id);
+				}
+				if (c.seller_id && isUUID(c.seller_id) && !profilesMap[c.seller_id]?.full_name) {
+					participantIds.add(c.seller_id);
+				}
+			});
+			(msgsData || []).forEach((m: any) => {
+				if (m.sender_id && isUUID(m.sender_id) && !profilesMap[m.sender_id]?.full_name) {
+					participantIds.add(m.sender_id);
+				}
+			});
+
+			if (participantIds.size > 0) {
+				const { data: missingProfiles } = await supabase
+					.from("profiles")
+					.select("id, full_name, phone, avatar_url")
+					.in("id", Array.from(participantIds));
+				missingProfiles?.forEach((p: any) => {
+					profilesMap[p.id] = p;
+				});
+			}
+
+			// Indexer les conversations par ID pour résoudre les noms dans les messages
+			const convById: Record<string, any> = {};
+			(convsData || []).forEach((c: any) => {
+				convById[c.id] = c;
+			});
+
 			const groupedMessages: Record<string, Message[]> = {};
 			if (msgsData && msgsData.length > 0) {
 				msgsData.forEach((m: any) => {
@@ -89,12 +121,21 @@ export const messagesService = {
 						groupedMessages[convId] = [];
 					}
 					const senderProfile = profilesMap[m.sender_id];
+					const parentConv = convById[convId];
+					const matchedListing = parentConv
+						? listingsMap[parentConv.listing_id]
+						: undefined;
+					const fallbackSenderName =
+						parentConv && m.sender_id === parentConv.seller_id
+							? matchedListing?.owner?.name || "Vendeur"
+							: "Client";
+
 					groupedMessages[convId].push({
 						id: m.id,
 						conversationId: convId,
 						senderId: m.sender_id,
 						senderName:
-							senderProfile?.full_name || "Utilisateur",
+							senderProfile?.full_name?.trim() || fallbackSenderName,
 						text: m.content,
 						createdAt: m.created_at,
 					});
@@ -123,6 +164,13 @@ export const messagesService = {
 						),
 				).length;
 
+				const resolvedBuyerName =
+					buyerProfile?.full_name?.trim() || "Client";
+				const resolvedSellerName =
+					sellerProfile?.full_name?.trim() ||
+					matchedListing?.owner?.name?.trim() ||
+					"Vendeur";
+
 				return {
 					id: c.id,
 					listingId: c.listing_id || "",
@@ -133,9 +181,9 @@ export const messagesService = {
 						"https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=300&q=80",
 					listingPrice: matchedListing?.price || 0,
 					buyerId: c.buyer_id,
-					buyerName: buyerProfile?.full_name || "Acheteur",
+					buyerName: resolvedBuyerName,
 					sellerId: c.seller_id,
-					sellerName: sellerProfile?.full_name || "Vendeur",
+					sellerName: resolvedSellerName,
 					lastMessage: lastMsgText,
 					updatedAt: c.updated_at,
 					unreadCount,
