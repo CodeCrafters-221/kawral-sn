@@ -6,9 +6,7 @@ import {
 	XCircle,
 	AlertTriangle,
 	Users,
-	Building2,
 	Eye,
-	ShieldCheck,
 	FolderTree,
 	Pencil,
 	Plus,
@@ -18,10 +16,6 @@ import {
 	Phone,
 	Activity,
 	MapPin,
-	CheckCircle,
-	Ban,
-	ChevronLeft,
-	ChevronRight,
 	X,
 	MessageSquare,
 	ListFilter,
@@ -30,6 +24,7 @@ import {
 	CheckSquare,
 	Square,
 	TrendingUp,
+	History,
 } from "lucide-react";
 import {
 	Button,
@@ -40,6 +35,7 @@ import {
 	CardTitle,
 	Input,
 	Tabs,
+	Pagination,
 	type TabItem,
 } from "../../../components/ui";
 import {
@@ -48,49 +44,19 @@ import {
 	type AdminRole,
 	type AdminUser,
 } from "../../../services/supabase/adminService";
+import { recordModificationLog } from "../../../lib/analytics";
+import { AdminGoogleAnalytics } from "../components/AdminGoogleAnalytics";
+import { AdminModificationHistory } from "../components/AdminModificationHistory";
 import type { Listing, ListingStatus } from "../../../types";
 
-const ADMIN_PAGE_SIZE = 8;
-
-const PaginationControls: React.FC<{
-	page: number;
-	totalItems: number;
-	onPageChange: (page: number) => void;
-}> = ({ page, totalItems, onPageChange }) => {
-	const totalPages = Math.max(
-		1,
-		Math.ceil(totalItems / ADMIN_PAGE_SIZE),
-	);
-	if (totalItems <= ADMIN_PAGE_SIZE) return null;
-
-	return (
-		<div className="flex flex-wrap items-center justify-between gap-3 border-t border-kawral-border p-4">
-			<span className="text-[11px] font-semibold text-kawral-muted">
-				Page {page} sur {totalPages} · {totalItems} éléments
-			</span>
-			<div className="flex items-center gap-2">
-				<button
-					type="button"
-					disabled={page === 1}
-					onClick={() => onPageChange(page - 1)}
-					className="rounded-xl border border-kawral-border p-2 text-kawral-green disabled:cursor-not-allowed disabled:opacity-40"
-					aria-label="Page précédente"
-				>
-					<ChevronLeft className="h-4 w-4" />
-				</button>
-				<button
-					type="button"
-					disabled={page === totalPages}
-					onClick={() => onPageChange(page + 1)}
-					className="rounded-xl border border-kawral-border p-2 text-kawral-green disabled:cursor-not-allowed disabled:opacity-40"
-					aria-label="Page suivante"
-				>
-					<ChevronRight className="h-4 w-4" />
-				</button>
-			</div>
-		</div>
-	);
-};
+type AdminTabFilter =
+	| "analytics"
+	| "modifications"
+	| "pending"
+	| "reports"
+	| "users"
+	| "categories"
+	| "all-listings";
 
 export const AdminDashboard: React.FC = () => {
 	const {
@@ -105,19 +71,15 @@ export const AdminDashboard: React.FC = () => {
 		addToast,
 	} = useApp();
 
-	const [filter, setFilter] = useState<
-		| "pending"
-		| "reports"
-		| "users"
-		| "categories"
-		| "all-listings"
-	>("all-listings");
+	const [filter, setFilter] =
+		useState<AdminTabFilter>("analytics");
 	const [users, setUsers] = useState<AdminUser[]>([]);
 	const [categories, setCategories] = useState<
 		AdminCategory[]
 	>([]);
 	const [search, setSearch] = useState("");
 	const [activePage, setActivePage] = useState(1);
+	const [pageSize, setPageSize] = useState(8);
 	const [categoryName, setCategoryName] = useState("");
 	const [categorySlug, setCategorySlug] = useState("");
 	const [editingCategoryId, setEditingCategoryId] =
@@ -228,17 +190,15 @@ export const AdminDashboard: React.FC = () => {
 	const rentAvgPrice = rentListings.length
 		? Math.round(rentListings.reduce((sum, l) => sum + l.price, 0) / rentListings.length)
 		: 0;
-	const saleAvgPrice = saleListings.length
-		? Math.round(saleListings.reduce((sum, l) => sum + l.price, 0) / saleListings.length)
-		: 0;
 	const totalSaleVolume = saleListings.reduce((sum, l) => sum + l.price, 0);
 	const approvalRate = listings.length
 		? Math.round((activeListings.length / listings.length) * 100)
 		: 100;
+
 	const pagedItems = <T,>(items: T[]) =>
 		items.slice(
-			(activePage - 1) * ADMIN_PAGE_SIZE,
-			activePage * ADMIN_PAGE_SIZE,
+			(activePage - 1) * pageSize,
+			activePage * pageSize,
 		);
 	const pagedPendingListings = pagedItems(
 		filteredPendingListings,
@@ -249,7 +209,7 @@ export const AdminDashboard: React.FC = () => {
 
 	useEffect(() => {
 		setActivePage(1);
-	}, [filter, search]);
+	}, [filter, search, pageSize]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -282,8 +242,19 @@ export const AdminDashboard: React.FC = () => {
 	}, [currentUser]);
 
 	const handleApprove = (id: string) => {
+		const target = listings.find((l) => l.id === id);
 		updateListingStatus(id, "published");
 		setSelectedPendingIds((prev) => prev.filter((i) => i !== id));
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "listing_approved",
+			targetTitle: target?.title || `Annonce #${id.slice(0, 8)}`,
+			targetId: id,
+			details: "Approbation et mise en ligne depuis le panneau de modération",
+			previousValue: "Brouillon",
+			newValue: "Publiée",
+		});
 		addToast("Annonce approuvée et publiée !", "success");
 	};
 
@@ -303,7 +274,20 @@ export const AdminDashboard: React.FC = () => {
 
 	const confirmReject = () => {
 		if (rejectListingIds.length === 0) return;
-		rejectListingIds.forEach((id) => updateListingStatus(id, "archived"));
+		rejectListingIds.forEach((id) => {
+			const target = listings.find((l) => l.id === id);
+			updateListingStatus(id, "archived");
+			recordModificationLog({
+				actorName: currentUser?.name || "Administrateur",
+				actorRole: "admin",
+				actionType: "listing_rejected",
+				targetTitle: target?.title || `Annonce #${id.slice(0, 8)}`,
+				targetId: id,
+				details: `Refus de l'annonce${rejectReason ? ` — Motif : ${rejectReason}` : ""}`,
+				previousValue: "Brouillon",
+				newValue: "Archivé",
+			});
+		});
 		addToast(
 			`${rejectListingIds.length} annonce(s) refusée(s)${rejectReason ? ` — Motif : ${rejectReason}` : "."}`,
 			"info",
@@ -322,7 +306,20 @@ export const AdminDashboard: React.FC = () => {
 
 	const handleBulkApprove = () => {
 		if (selectedPendingIds.length === 0) return;
-		selectedPendingIds.forEach((id) => updateListingStatus(id, "published"));
+		selectedPendingIds.forEach((id) => {
+			const target = listings.find((l) => l.id === id);
+			updateListingStatus(id, "published");
+			recordModificationLog({
+				actorName: currentUser?.name || "Administrateur",
+				actorRole: "admin",
+				actionType: "listing_approved",
+				targetTitle: target?.title || `Annonce #${id.slice(0, 8)}`,
+				targetId: id,
+				details: "Approbation groupée et publication immédiate",
+				previousValue: "Brouillon",
+				newValue: "Publiée",
+			});
+		});
 		addToast(
 			`${selectedPendingIds.length} annonce(s) approuvée(s) et publiée(s) !`,
 			"success",
@@ -383,12 +380,29 @@ export const AdminDashboard: React.FC = () => {
 
 	const handleSaveImprovedDesc = async () => {
 		if (!previewListing || editingDesc === null) return;
+		const oldLen = (previewListing.description || "").length;
 		await updateListing(previewListing.id, { description: editingDesc });
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "ai_description",
+			targetTitle: previewListing.title,
+			targetId: previewListing.id,
+			details: "Reformulation et enregistrement de la description via l'assistant IA",
+			previousValue: `${oldLen} caractères`,
+			newValue: `${editingDesc.length} caractères`,
+		});
 		setPreviewListing((prev) =>
 			prev ? { ...prev, description: editingDesc } : null,
 		);
 		setEditingDesc(null);
 		addToast("Description mise à jour et enregistrée !", "success");
+	};
+
+	const roleLabels: Record<AdminRole, string> = {
+		client: "Client",
+		vendeur: "Vendeur",
+		admin: "Admin",
 	};
 
 	const handleRoleChange = async (
@@ -402,6 +416,7 @@ export const AdminDashboard: React.FC = () => {
 			);
 			return;
 		}
+		const previousRole = user.role;
 		const result = await adminService.updateUserRole(
 			user.id,
 			role,
@@ -418,6 +433,16 @@ export const AdminDashboard: React.FC = () => {
 				item.id === user.id ? { ...item, role } : item,
 			),
 		);
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "role_updated",
+			targetTitle: user.full_name || user.phone || "Utilisateur",
+			targetId: user.id,
+			details: "Modification du rôle utilisateur depuis l'administration",
+			previousValue: roleLabels[previousRole],
+			newValue: roleLabels[role],
+		});
 		addToast("Rôle utilisateur mis à jour.", "success");
 	};
 
@@ -450,6 +475,14 @@ export const AdminDashboard: React.FC = () => {
 				a.name.localeCompare(b.name),
 			),
 		);
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "category_updated",
+			targetTitle: `Catégorie ${name}`,
+			details: `Création d'une nouvelle catégorie (${slug})`,
+			newValue: name,
+		});
 		setCategoryName("");
 		setCategorySlug("");
 		addToast("Catégorie créée.", "success");
@@ -467,6 +500,7 @@ export const AdminDashboard: React.FC = () => {
 			);
 			return;
 		}
+		const existingCat = categories.find((c) => c.id === categoryId);
 		const result = await adminService.updateCategory(
 			categoryId,
 			{ name, slug },
@@ -486,6 +520,16 @@ export const AdminDashboard: React.FC = () => {
 					: item,
 			),
 		);
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "category_updated",
+			targetTitle: `Catégorie ${name}`,
+			targetId: categoryId,
+			details: `Modification du nom ou du slug de la catégorie`,
+			previousValue: existingCat?.name,
+			newValue: name,
+		});
 		setEditingCategoryId(null);
 		addToast("Catégorie mise à jour.", "success");
 	};
@@ -513,14 +557,19 @@ export const AdminDashboard: React.FC = () => {
 		setCategories((previous) =>
 			previous.filter((item) => item.id !== category.id),
 		);
+		recordModificationLog({
+			actorName: currentUser?.name || "Administrateur",
+			actorRole: "admin",
+			actionType: "category_updated",
+			targetTitle: `Catégorie ${category.name}`,
+			targetId: category.id,
+			details: "Suppression de la catégorie",
+			previousValue: category.name,
+			newValue: "Supprimée",
+		});
 		addToast("Catégorie supprimée.", "info");
 	};
 
-	const roleLabels: Record<AdminRole, string> = {
-		client: "Client",
-		vendeur: "Vendeur",
-		admin: "Admin",
-	};
 	const searchPlaceholder =
 		filter === "categories"
 			? "Rechercher une catégorie ou un slug"
@@ -528,11 +577,29 @@ export const AdminDashboard: React.FC = () => {
 				? "Rechercher un utilisateur, un téléphone ou un rôle"
 				: filter === "reports"
 					? "Rechercher un signalement"
-					: filter === "all-listings"
-						? "Rechercher dans toutes les annonces"
-						: "Rechercher une annonce en attente";
+					: filter === "modifications"
+						? "Rechercher une modification, une annonce ou un auteur"
+						: filter === "all-listings"
+							? "Rechercher dans toutes les annonces"
+							: "Rechercher une annonce en attente";
 
 	const tabItems: TabItem[] = [
+		{
+			id: "analytics",
+			label: "Google Analytics & Trafic",
+			icon: <BarChart3 className="w-3.5 h-3.5 text-kawral-orange" />,
+		},
+		{
+			id: "modifications",
+			label: "Journal des modifications",
+			icon: <History className="w-3.5 h-3.5 text-kawral-green" />,
+		},
+		{
+			id: "all-listings",
+			label: "Catalogue complet",
+			count: listings.length,
+			icon: <ListFilter className="w-3.5 h-3.5" />,
+		},
 		{
 			id: "pending",
 			label: "Validation en attente",
@@ -559,12 +626,6 @@ export const AdminDashboard: React.FC = () => {
 			count: categories.length,
 			icon: <FolderTree className="w-3.5 h-3.5" />,
 		},
-		{
-			id: "all-listings",
-			label: "Catalogue complet",
-			count: listings.length,
-			icon: <ListFilter className="w-3.5 h-3.5" />,
-		},
 	];
 
 	return (
@@ -574,11 +635,11 @@ export const AdminDashboard: React.FC = () => {
 				<div className="flex items-center gap-2">
 					<ShieldAlert className="w-6 h-6 text-kawral-orange" />
 					<h1 className="text-xl sm:text-2xl font-black">
-						Panneau de Modération & Administration Kawral
+						Panneau de Modération, Analytics & Administration Kawral
 					</h1>
 				</div>
 				<p className="text-xs text-slate-300">
-					Les annonces sont publiées directement sur la marketplace. Vous pouvez modérer le catalogue, traiter les signalements et supprimer les annonces en infraction.
+					Suivez en direct les performances Google Analytics (trafic Aujourd'hui, 7j, 30j, temps réel, marketing et infos visiteurs), consultez le journal paginé des modifications et modérez la marketplace.
 				</p>
 			</div>
 
@@ -867,26 +928,22 @@ export const AdminDashboard: React.FC = () => {
 				items={tabItems}
 				activeId={filter}
 				onChange={(id) =>
-					setFilter(
-						id as
-							| "pending"
-							| "reports"
-							| "users"
-							| "categories"
-							| "all-listings",
-					)
+					setFilter(id as AdminTabFilter)
 				}
 				variant="pills"
 			/>
-			<div className="max-w-xl">
-				<Input
-					value={search}
-					onChange={(event) =>
-						setSearch(event.target.value)
-					}
-					placeholder={searchPlaceholder}
-				/>
-			</div>
+
+			{filter !== "analytics" && (
+				<div className="max-w-xl">
+					<Input
+						value={search}
+						onChange={(event) =>
+							setSearch(event.target.value)
+						}
+						placeholder={searchPlaceholder}
+					/>
+				</div>
+			)}
 
 			{adminDataError && (
 				<Card className="border-rose-200">
@@ -894,6 +951,17 @@ export const AdminDashboard: React.FC = () => {
 						{adminDataError}
 					</CardContent>
 				</Card>
+			)}
+
+			{/* ── Onglet Google Analytics & Trafic ── */}
+			{filter === "analytics" && <AdminGoogleAnalytics />}
+
+			{/* ── Onglet Journal paginé des modifications ── */}
+			{filter === "modifications" && (
+				<AdminModificationHistory
+					listings={listings}
+					searchQuery={search}
+				/>
 			)}
 
 			{loadingAdminData &&
@@ -982,10 +1050,14 @@ export const AdminDashboard: React.FC = () => {
 								</tbody>
 							</table>
 						)}
-						<PaginationControls
+						<Pagination
 							page={activePage}
 							totalItems={filteredUsers.length}
+							pageSize={pageSize}
 							onPageChange={setActivePage}
+							onPageSizeChange={setPageSize}
+							pageSizeOptions={[8, 16, 32]}
+							itemLabel="utilisateurs"
 						/>
 					</CardContent>
 				</Card>
@@ -1143,10 +1215,14 @@ export const AdminDashboard: React.FC = () => {
 									</tbody>
 								</table>
 							)}
-							<PaginationControls
+							<Pagination
 								page={activePage}
 								totalItems={filteredCategories.length}
+								pageSize={pageSize}
 								onPageChange={setActivePage}
+								onPageSizeChange={setPageSize}
+								pageSizeOptions={[8, 16, 32]}
+								itemLabel="catégories"
 							/>
 						</CardContent>
 					</Card>
@@ -1317,10 +1393,15 @@ export const AdminDashboard: React.FC = () => {
 							})}
 						</>
 					)}
-					<PaginationControls
+					<Pagination
 						page={activePage}
 						totalItems={filteredPendingListings.length}
+						pageSize={pageSize}
 						onPageChange={setActivePage}
+						onPageSizeChange={setPageSize}
+						pageSizeOptions={[8, 16, 32]}
+						itemLabel="annonces en attente"
+						className="rounded-2xl border border-kawral-border"
 					/>
 				</div>
 			)}
@@ -1389,10 +1470,15 @@ export const AdminDashboard: React.FC = () => {
 							</Card>
 						))
 					)}
-					<PaginationControls
+					<Pagination
 						page={activePage}
 						totalItems={filteredReports.length}
+						pageSize={pageSize}
 						onPageChange={setActivePage}
+						onPageSizeChange={setPageSize}
+						pageSizeOptions={[8, 16, 32]}
+						itemLabel="signalements"
+						className="rounded-2xl border border-kawral-border"
 					/>
 				</div>
 			)}
@@ -1444,22 +1530,6 @@ export const AdminDashboard: React.FC = () => {
 									</thead>
 									<tbody>
 										{pagedItems(filteredAllListings).map((item) => {
-											const statusColors: Record<string, string> = {
-												published: "success",
-												draft: "accent",
-												unavailable: "default",
-												sold: "success",
-												rented: "success",
-												archived: "destructive",
-											};
-											const statusLabels: Record<string, string> = {
-												published: "Publiée",
-												draft: "Brouillon",
-												unavailable: "Indisponible",
-												sold: "Vendu",
-												rented: "Loué",
-												archived: "Archivé",
-											};
 											return (
 												<tr key={item.id} className="border-t border-kawral-border">
 													<td className="p-4">
@@ -1528,10 +1598,14 @@ export const AdminDashboard: React.FC = () => {
 									</tbody>
 								</table>
 							</CardContent>
-							<PaginationControls
+							<Pagination
 								page={activePage}
 								totalItems={filteredAllListings.length}
+								pageSize={pageSize}
 								onPageChange={setActivePage}
+								onPageSizeChange={setPageSize}
+								pageSizeOptions={[8, 16, 32]}
+								itemLabel="annonces"
 							/>
 						</Card>
 					)}

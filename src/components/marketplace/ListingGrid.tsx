@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Listing } from '../../types';
 import { ListingCard } from './ListingCard';
 import { ListingGridSkeleton } from './Skeletons';
+import { Pagination } from '../ui/Pagination';
 import { useApp } from '../../context/AppContext';
 import { Grid, List, SearchX, RefreshCw, ChevronDown } from 'lucide-react';
 
@@ -17,6 +18,8 @@ interface ListingGridProps {
   withSidebar?: boolean;
   /** Défilement horizontal sur mobile (ex: Tendance sur Kawral) */
   mobileHorizontalScroll?: boolean;
+  /** Taille de page pour la pagination (par défaut 12) */
+  defaultPageSize?: number;
 }
 
 export const ListingGrid: React.FC<ListingGridProps> = ({
@@ -28,10 +31,26 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
   layout: controlledLayout,
   withSidebar = false,
   mobileHorizontalScroll = false,
+  defaultPageSize = 12,
 }) => {
   const { filters, setFilters, resetFilters, isLoadingListings } = useApp();
   const [internalLayout, setLayout] = useState<'grid' | 'list'>('grid');
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(defaultPageSize);
   const layout = controlledLayout ?? internalLayout;
+
+  useEffect(() => {
+    setPage(1);
+  }, [
+    filters.search,
+    filters.category,
+    filters.transactionType,
+    filters.location,
+    filters.priceMin,
+    filters.priceMax,
+    filters.sortBy,
+    listings.length,
+  ]);
 
   const showSkeleton = isLoading !== undefined ? isLoading : isLoadingListings;
 
@@ -45,6 +64,10 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
       />
     );
   }
+
+  const displayedListings = mobileHorizontalScroll
+    ? listings
+    : listings.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -136,40 +159,58 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
           </button>
         </div>
       ) : (
-        /* Listings Layout */
-        <div
-          className={
-            layout === 'grid'
-              ? mobileHorizontalScroll
-                ? 'flex flex-nowrap items-stretch overflow-x-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 pb-3 sm:pb-0 scroll-smooth snap-x snap-mandatory no-scrollbar w-full'
-                : withSidebar
-                  ? 'grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5'
-                  : 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6'
-              : 'flex flex-col gap-4'
-          }
-          style={
-            mobileHorizontalScroll
-              ? { WebkitOverflowScrolling: 'touch' }
-              : undefined
-          }
-        >
-          {listings.map((item, index) => (
-            <div
-              key={item.id}
-              className={
-                mobileHorizontalScroll
-                  ? 'w-[calc(50%-6px)] min-w-[calc(50%-6px)] max-w-[calc(50%-6px)] shrink-0 snap-start sm:w-auto sm:min-w-0 sm:max-w-none sm:shrink flex flex-col h-full self-stretch'
-                  : 'min-w-0 flex flex-col h-full self-stretch'
-              }
-            >
-              <ListingCard
-                listing={item}
-                layout={layout}
-                imageLoading={index < 4 ? 'eager' : 'lazy'}
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          {/* Listings Layout */}
+          <div
+            className={
+              layout === 'grid'
+                ? mobileHorizontalScroll
+                  ? 'flex flex-nowrap items-stretch overflow-x-auto sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 pb-3 sm:pb-0 scroll-smooth snap-x snap-mandatory no-scrollbar w-full'
+                  : withSidebar
+                    ? 'grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5'
+                    : 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6'
+                : 'flex flex-col gap-4'
+            }
+            style={
+              mobileHorizontalScroll
+                ? { WebkitOverflowScrolling: 'touch' }
+                : undefined
+            }
+          >
+            {displayedListings.map((item, index) => (
+              <div
+                key={item.id}
+                className={
+                  mobileHorizontalScroll
+                    ? 'w-[calc(50%-6px)] min-w-[calc(50%-6px)] max-w-[calc(50%-6px)] shrink-0 snap-start sm:w-auto sm:min-w-0 sm:max-w-none sm:shrink flex flex-col h-full self-stretch'
+                    : 'min-w-0 flex flex-col h-full self-stretch'
+                }
+              >
+                <ListingCard
+                  listing={item}
+                  layout={layout}
+                  imageLoading={index < 4 ? 'eager' : 'lazy'}
+                />
+              </div>
+            ))}
+          </div>
+
+          {!mobileHorizontalScroll && listings.length > pageSize && (
+            <Pagination
+              page={page}
+              totalItems={listings.length}
+              pageSize={pageSize}
+              onPageChange={(newPage) => {
+                setPage(newPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[12, 24, 48]}
+              itemLabel="annonces"
+              className="rounded-2xl border border-kawral-border shadow-xs"
+            />
+          )}
+        </>
       )}
 
     </div>

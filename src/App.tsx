@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider, useApp } from './context/AppContext';
@@ -12,6 +12,7 @@ import { RequirePhoneModal } from './components/modals/RequirePhoneModal';
 import { PwaInstallBanner } from './components/pwa/PwaInstallBanner';
 import { BecomeSellerModal } from './components/modals/BecomeSellerModal';
 import { AppRoutes } from './routes';
+import { initGoogleAnalytics, trackPageView } from './lib/analytics';
 
 const AppContent: React.FC = () => {
   const {
@@ -22,6 +23,14 @@ const AppContent: React.FC = () => {
     currentView,
   } = useApp();
   const location = useLocation();
+
+  useEffect(() => {
+    initGoogleAnalytics();
+  }, []);
+
+  useEffect(() => {
+    trackPageView(`${location.pathname}${location.search}`);
+  }, [location.pathname, location.search]);
 
   const isHomePage = currentView === 'home' && location.pathname === '/';
   const isListingDetailPage =
