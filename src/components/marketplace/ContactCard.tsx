@@ -3,6 +3,7 @@ import { Phone, MessageSquare, Calendar, CheckCircle2, Shield } from 'lucide-rea
 import { Listing } from '../../types';
 import { WhatsAppIcon } from '../ui';
 import { buildWhatsAppUrl, getListingRef } from '../../utils/whatsapp';
+import { trackMarketingEvent } from '../../lib/analytics';
 
 const QUICK_MESSAGES = ['Toujours disponible ?', 'Je veux visiter.', 'Négociable ?'];
 
@@ -28,6 +29,45 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
   const ownerLabel =
     listing.owner.type === 'owner' ? 'Propriétaire' : 'Vendeur';
   const listingRef = getListingRef(listing.id);
+
+  const handlePhoneClick = () => {
+    trackMarketingEvent('phone_click', {
+      item_id: listing.id,
+      item_name: listing.title,
+      item_category: listing.categoryLabel,
+      city: listing.location.city,
+    });
+    onShowPhone();
+  };
+
+  const handleWhatsAppClick = () => {
+    trackMarketingEvent('whatsapp_click', {
+      item_id: listing.id,
+      item_name: listing.title,
+      item_category: listing.categoryLabel,
+      city: listing.location.city,
+    });
+  };
+
+  const handleChatClick = () => {
+    trackMarketingEvent('contact_seller', {
+      item_id: listing.id,
+      item_name: listing.title,
+      item_category: listing.categoryLabel,
+      method: 'internal_chat',
+    });
+    onChat();
+  };
+
+  const handleAppointmentClick = () => {
+    trackMarketingEvent('book_appointment', {
+      item_id: listing.id,
+      item_name: listing.title,
+      item_category: listing.categoryLabel,
+      city: listing.location.city,
+    });
+    onAppointment();
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-kawral-border overflow-hidden shadow-lg">
@@ -96,17 +136,18 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
       <div className="px-5 pb-2.5">
         {showPhone ? (
           <a href={`tel:${listing.owner.phone}`}
+            onClick={handlePhoneClick}
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-kawral-green text-white font-bold text-sm shadow-md">
             <Phone className="w-4 h-4 text-kawral-orange" /> {listing.owner.phone}
           </a>
         ) : (
           <div className="flex rounded-2xl overflow-hidden shadow-md">
-            <button onClick={onShowPhone}
+            <button onClick={handlePhoneClick}
               className="flex-1 bg-kawral-green hover:bg-[#0a3d38] text-white py-3.5 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
               <Phone className="w-4 h-4 text-kawral-orange" /> Appeler
             </button>
             <div className="w-px bg-white/20" />
-            <button onClick={onShowPhone}
+            <button onClick={handlePhoneClick}
               className="px-4 bg-kawral-green hover:bg-[#0a3d38] text-white/70 hover:text-white text-[10px] font-bold transition-colors flex items-center">
               Voir n°
             </button>
@@ -121,6 +162,7 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleWhatsAppClick}
             className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
           >
             <WhatsAppIcon className="w-4 h-4 fill-current shrink-0" />
@@ -131,13 +173,13 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
 
       {/* Secondary actions */}
       <div className={`px-5 pb-5 ${hideAppointment ? 'flex' : 'grid grid-cols-2'} gap-2.5`}>
-        <button onClick={onChat}
+        <button onClick={handleChatClick}
           className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-kawral-orange hover:bg-[#e06a10] text-white font-bold text-xs shadow-sm transition-colors active:scale-[0.98] cursor-pointer">
           <MessageSquare className="w-3.5 h-3.5" />
           {quickMsg ? 'Envoyer' : 'Envoyer un message'}
         </button>
         {!hideAppointment && (
-          <button onClick={onAppointment}
+          <button onClick={handleAppointmentClick}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-kawral-border bg-kawral-ivory hover:bg-slate-100 text-kawral-dark font-bold text-xs transition-colors cursor-pointer">
             <Calendar className="w-3.5 h-3.5 text-kawral-green" /> Rendez-vous
           </button>
@@ -148,11 +190,10 @@ export const ContactCard: React.FC<Props> = ({ listing, showPhone, onShowPhone, 
       <div className="px-5 py-3 bg-kawral-ivory border-t border-kawral-border flex items-center gap-2">
         <Shield className="w-3.5 h-3.5 text-kawral-green shrink-0" />
         <p className="text-[10px] text-kawral-muted leading-snug font-medium">
-          {hideAppointment
-            ? "Ne payez jamais d'acompte avant d'avoir vérifié l'article en personne."
-            : "Ne payez jamais d'acompte avant visite et vérification des titres."}
+          Ne versez jamais d'argent avant d'avoir visité le bien et vérifié les documents.
         </p>
       </div>
+
     </div>
   );
 };

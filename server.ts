@@ -3,6 +3,11 @@ import "dotenv/config";
 import path from "path";
 import dns from "node:dns/promises";
 import { createServer as createViteServer } from "vite";
+import {
+  getAnalyticsDashboardData,
+  recordLiveAnalyticsEvent,
+  type AnalyticsPeriod,
+} from "./src/server/ga4Service";
 
 const app = express();
 const PORT = 3000;
@@ -55,6 +60,233 @@ app.get("/api/health", (_req, res) => {
     status: "ok",
     env: process.env.NODE_ENV || "development",
   });
+});
+
+// ── Google Analytics 4 & Télémétrie Temps Réel ──────────────────────────────
+
+// Collecteur d'événements temps réel envoyé par le client (en parallèle de gtag.js)
+app.post("/api/analytics/collect", (req, res) => {
+  try {
+    const clientIp =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.socket.remoteAddress ||
+      "unknown";
+    recordLiveAnalyticsEvent(req.body || {}, clientIp);
+    res.status(204).end();
+  } catch {
+    res.status(204).end();
+  }
+});
+
+// Endpoint Dashboard Admin Google Analytics (Trafic 24h/7j/30j, Temps réel, Marketing, Visiteurs)
+app.get("/api/admin/analytics", async (req, res) => {
+  try {
+    const rawPeriod = String(req.query.period || "7d");
+    const period: AnalyticsPeriod =
+      rawPeriod === "today" || rawPeriod === "30d" ? rawPeriod : "7d";
+    const data = await getAnalyticsDashboardData(period);
+    res.json(data);
+  } catch (err) {
+    console.error("Erreur lors de la récupération des données Google Analytics:", err);
+    res.status(500).json({
+      error: "ANALYTICS_ERROR",
+      message: "Impossible de charger les données Google Analytics.",
+    });
+  }
+});
+
+// Journal serveur des modifications pour la pagination des longues modifications
+interface ServerModificationLog {
+  id: string;
+  timestamp: string;
+  actorName: string;
+  actorRole: string;
+  actionType: string;
+  targetTitle: string;
+  targetId?: string;
+  details: string;
+  previousValue?: string;
+  newValue?: string;
+}
+
+const serverModificationsLog: ServerModificationLog[] = [
+  {
+    id: "mod_seed_1",
+    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    actorName: "Moussa Diop (Immo Prestige)",
+    actorRole: "seller",
+    actionType: "listing_updated",
+    targetTitle: "Villa R+2 contemporaine avec piscine aux Almadies",
+    details: "Mise à jour du prix et ajout de 3 nouvelles photos HD",
+    previousValue: "295 000 000 FCFA",
+    newValue: "285 000 000 FCFA",
+  },
+  {
+    id: "mod_seed_2",
+    timestamp: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "listing_approved",
+    targetTitle: "Appartement F4 haut standing vue mer — Plateau",
+    details: "Validation et mise en ligne après vérification des photos",
+    previousValue: "Brouillon",
+    newValue: "Publiée",
+  },
+  {
+    id: "mod_seed_3",
+    timestamp: new Date(Date.now() - 95 * 60 * 1000).toISOString(),
+    actorName: "Fatou Ndiaye",
+    actorRole: "seller",
+    actionType: "listing_created",
+    targetTitle: "Terrain viabilisé 300m² titre foncier — Diamniadio",
+    details: "Publication d'une nouvelle annonce (Immobilier • Diamniadio) à 18 500 000 FCFA",
+    newValue: "Publiée",
+  },
+  {
+    id: "mod_seed_4",
+    timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    actorName: "Cheikh Fall Auto",
+    actorRole: "seller",
+    actionType: "status_changed",
+    targetTitle: "Toyota Prado TXL 2022 Automatique Diésel",
+    details: "Changement de statut de l'annonce après conclusion de la vente",
+    previousValue: "Publiée",
+    newValue: "Vendu",
+  },
+  {
+    id: "mod_seed_5",
+    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "ai_description",
+    targetTitle: "Studio meublé climatisé Mermoz Pyrotechnie",
+    details: "Reformulation et enrichissement de la description par l'assistant IA",
+    previousValue: "Description courte (85 car.)",
+    newValue: "Description optimisée SEO (410 car.)",
+  },
+  {
+    id: "mod_seed_6",
+    timestamp: new Date(Date.now() - 7 * 3600 * 1000).toISOString(),
+    actorName: "Awa Seck",
+    actorRole: "seller",
+    actionType: "listing_updated",
+    targetTitle: "Local commercial 120m² sur axe principal Sacré-Cœur 3",
+    details: "Modification du loyer mensuel et des conditions de bail",
+    previousValue: "850 000 FCFA / mois",
+    newValue: "780 000 FCFA / mois",
+  },
+  {
+    id: "mod_seed_7",
+    timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "role_updated",
+    targetTitle: "Ibrahima Sagna (Teranga Motors)",
+    details: "Promotion du compte utilisateur vers le rôle Vendeur vérifié",
+    previousValue: "Client",
+    newValue: "Vendeur",
+  },
+  {
+    id: "mod_seed_8",
+    timestamp: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "listing_rejected",
+    targetTitle: "iPhone 15 Pro Max 256Go Neuf",
+    details: "Refus de l'annonce — Motif : Photos manquantes ou prix suspect",
+    previousValue: "Brouillon",
+    newValue: "Archivé",
+  },
+  {
+    id: "mod_seed_9",
+    timestamp: new Date(Date.now() - 25 * 3600 * 1000).toISOString(),
+    actorName: "Ousmane Ba",
+    actorRole: "seller",
+    actionType: "status_changed",
+    targetTitle: "Appartement F3 meublé Ngor Almadies",
+    details: "Mise à jour de disponibilité suite à une location longue durée",
+    previousValue: "Publiée",
+    newValue: "Loué",
+  },
+  {
+    id: "mod_seed_10",
+    timestamp: new Date(Date.now() - 31 * 3600 * 1000).toISOString(),
+    actorName: "Khadija Sy",
+    actorRole: "seller",
+    actionType: "listing_created",
+    targetTitle: "Villa pieds dans l'eau Saly Portudal avec piscine",
+    details: "Publication d'une nouvelle annonce (Immobilier • Mbour / Saly) à 1 200 000 FCFA",
+    newValue: "Publiée",
+  },
+  {
+    id: "mod_seed_11",
+    timestamp: new Date(Date.now() - 40 * 3600 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "category_updated",
+    targetTitle: "Catégorie Matériel Professionnel",
+    details: "Mise à jour du nom et du slug de la catégorie",
+    previousValue: "materiel",
+    newValue: "materiel-pro",
+  },
+  {
+    id: "mod_seed_12",
+    timestamp: new Date(Date.now() - 52 * 3600 * 1000).toISOString(),
+    actorName: "Mamadou Gueye",
+    actorRole: "seller",
+    actionType: "listing_updated",
+    targetTitle: "Hyundai Tucson 2021 Full Options — Dakar",
+    details: "Modification du kilométrage et ajout du carnet d'entretien",
+    previousValue: "14 200 000 FCFA",
+    newValue: "13 800 000 FCFA",
+  },
+  {
+    id: "mod_seed_13",
+    timestamp: new Date(Date.now() - 64 * 3600 * 1000).toISOString(),
+    actorName: "Administrateur",
+    actorRole: "admin",
+    actionType: "listing_deleted",
+    targetTitle: "Annonce en doublon — Terrain Mbour",
+    details: "Suppression définitive suite à un signalement vérifié",
+    previousValue: "Publiée",
+    newValue: "Supprimée",
+  },
+];
+
+app.get("/api/admin/modifications", (_req, res) => {
+  res.json({ items: serverModificationsLog });
+});
+
+app.post("/api/admin/modifications", (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!body.targetTitle || !body.actionType) {
+      return res.status(400).json({ error: "INVALID_MODIFICATION_LOG" });
+    }
+    const entry: ServerModificationLog = {
+      id: String(body.id || `mod_${Date.now()}`),
+      timestamp: String(body.timestamp || new Date().toISOString()),
+      actorName: String(body.actorName || "Utilisateur").slice(0, 120),
+      actorRole: String(body.actorRole || "seller").slice(0, 40),
+      actionType: String(body.actionType).slice(0, 60),
+      targetTitle: String(body.targetTitle).slice(0, 200),
+      targetId: body.targetId ? String(body.targetId).slice(0, 80) : undefined,
+      details: String(body.details || "").slice(0, 500),
+      previousValue: body.previousValue
+        ? String(body.previousValue).slice(0, 120)
+        : undefined,
+      newValue: body.newValue
+        ? String(body.newValue).slice(0, 120)
+        : undefined,
+    };
+    serverModificationsLog.unshift(entry);
+    if (serverModificationsLog.length > 500) {
+      serverModificationsLog.length = 500;
+    }
+    return res.status(201).json({ ok: true, item: entry });
+  } catch {
+    return res.status(500).json({ error: "SERVER_ERROR" });
+  }
 });
 
 // Liste des domaines emails temporaires / jetables

@@ -23,3 +23,4 @@ export * from './ToastContainer';
 export * from './AudioPlayer';
 export * from './WhatsAppIcon';
 export * from './GoogleIcon';
+export * from './Pagination';

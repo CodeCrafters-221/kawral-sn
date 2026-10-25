@@ -17,6 +17,7 @@ import { getCategoryLabel } from "../../../utils/formatters";
 import { isAppointmentEligible } from "../../../utils/appointments";
 import { getCharacteristicsForCategory } from "../../../data/characteristicsRegistry";
 import { getListingRef } from "../../../utils/whatsapp";
+import { trackMarketingEvent } from "../../../lib/analytics";
 
 export const ListingDetailPage: React.FC = () => {
   const {
@@ -83,6 +84,13 @@ export const ListingDetailPage: React.FC = () => {
       // sessionStorage indisponible (mode privé strict)
     }
     listingsService.incrementViews(listing.id);
+    trackMarketingEvent("view_item", {
+      item_id: listing.id,
+      item_name: listing.title,
+      item_category: listing.categoryLabel,
+      price: listing.price,
+      city: listing.location.city,
+    });
   }, [listing?.id, isOwner]);
 
   const [similarListings, setSimilarListings] = useState<Listing[]>([]);
