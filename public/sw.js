@@ -1,5 +1,5 @@
 // Kawral Progressive Web App Service Worker
-const CACHE_NAME = 'kawral-pwa-v3';
+const CACHE_NAME = 'kawral-pwa-v4';
 
 const STATIC_ASSETS = [
   '/',
@@ -8,8 +8,8 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.ico',
   '/favicon.png',
+  '/favicon-96x96.png',
   '/favicon-32.png',
-  '/favicon.svg',
   '/apple-touch-icon.png',
   '/images/icon-192.png',
   '/images/icon-192-maskable.png',
