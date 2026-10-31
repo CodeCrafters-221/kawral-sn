@@ -102,6 +102,7 @@ const HERO_SLIDES: HeroSlide[] = [
 
 export const HeroSection: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(() => new Set([0, 1]));
   const [isPlaying, setIsPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
@@ -157,6 +158,19 @@ export const HeroSection: React.FC = () => {
 
   const activeSlide = HERO_SLIDES[currentSlide];
 
+  useEffect(() => {
+    const nextIdx = (currentSlide + 1) % HERO_SLIDES.length;
+    const prevIdx = (currentSlide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length;
+    setLoadedSlides((prev) => {
+      if (prev.has(currentSlide) && prev.has(nextIdx) && prev.has(prevIdx)) return prev;
+      const next = new Set(prev);
+      next.add(currentSlide);
+      next.add(nextIdx);
+      next.add(prevIdx);
+      return next;
+    });
+  }, [currentSlide]);
+
   return (
     <section
       id="hero-section"
@@ -177,7 +191,11 @@ export const HeroSection: React.FC = () => {
             className={`absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms] ease-out ${
               idx === currentSlide ? "scale-105" : "scale-100"
             }`}
-            style={{ backgroundImage: `url(${slide.image})` }}
+            style={
+              loadedSlides.has(idx)
+                ? { backgroundImage: `url(${slide.image})` }
+                : undefined
+            }
           />
           {/* Subtle Dark Gradient Overlay for Maximum Legibility */}
           <div className="absolute inset-0 bg-linear-to-b from-[#0c1a22]/85 via-black/55 to-[#0c1a22]/85" />

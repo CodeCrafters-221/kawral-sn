@@ -51,6 +51,9 @@ export const ListingHeroGallery: React.FC<ListingHeroGalleryProps> = ({
           alt={listing.title}
           className="w-full h-full object-cover block select-none transition-transform duration-500 group-hover:scale-[1.02]"
           style={{ height: '100%' }}
+          fetchPriority="high"
+          decoding="async"
+          optimizeWidth={1200}
         />
 
         {/* Dégradé doux et discret pour la lisibilité des badges et boutons */}
@@ -194,6 +197,9 @@ export const ListingHeroGallery: React.FC<ListingHeroGalleryProps> = ({
             <SafeImage
               src={img}
               alt=""
+              loading="lazy"
+              decoding="async"
+              optimizeWidth={200}
               className="w-full h-full object-cover block"
               style={{ height: '100%' }}
             />

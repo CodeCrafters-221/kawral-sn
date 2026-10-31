@@ -20,6 +20,7 @@ interface ListingGridProps {
   mobileHorizontalScroll?: boolean;
   /** Taille de page pour la pagination (par défaut 12) */
   defaultPageSize?: number;
+  prioritizeFirstRow?: boolean;
 }
 
 export const ListingGrid: React.FC<ListingGridProps> = ({
@@ -32,6 +33,7 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
   withSidebar = false,
   mobileHorizontalScroll = false,
   defaultPageSize = 12,
+  prioritizeFirstRow = true,
 }) => {
   const { filters, setFilters, resetFilters, isLoadingListings } = useApp();
   const [internalLayout, setLayout] = useState<'grid' | 'list'>('grid');
@@ -189,7 +191,7 @@ export const ListingGrid: React.FC<ListingGridProps> = ({
                 <ListingCard
                   listing={item}
                   layout={layout}
-                  imageLoading={index < 4 ? 'eager' : 'lazy'}
+                  imageLoading={prioritizeFirstRow && index < 4 ? 'eager' : 'lazy'}
                 />
               </div>
             ))}

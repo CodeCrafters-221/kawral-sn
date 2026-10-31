@@ -109,6 +109,7 @@ export const HomePage: React.FC = () => {
           showControls={false}
           skeletonCount={8}
           mobileHorizontalScroll={true}
+          prioritizeFirstRow={false}
         />
       </section>
 
@@ -133,7 +134,7 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          <ListingGrid listings={realEstateListings} showControls={false} skeletonCount={4} />
+          <ListingGrid listings={realEstateListings} showControls={false} skeletonCount={4} prioritizeFirstRow={false} />
         </section>
       )}
 
@@ -158,7 +159,7 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          <ListingGrid listings={electronicsListings} showControls={false} skeletonCount={4} />
+          <ListingGrid listings={electronicsListings} showControls={false} skeletonCount={4} prioritizeFirstRow={false} />
         </section>
       )}
 

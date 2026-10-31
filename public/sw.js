@@ -1,5 +1,6 @@
 // Kawral Progressive Web App Service Worker
-const CACHE_NAME = 'kawral-pwa-v4';
+const CACHE_NAME = 'kawral-pwa-v5';
+const IMAGE_CACHE_NAME = 'kawral-images-v1';
 
 const STATIC_ASSETS = [
   '/',
@@ -33,11 +34,12 @@ self.addEventListener('install', (event) => {
 
 // Activate: clean up outdated caches and take control immediately
 self.addEventListener('activate', (event) => {
+  const validCaches = new Set([CACHE_NAME, IMAGE_CACHE_NAME]);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => !validCaches.has(name))
           .map((name) => caches.delete(name))
       );
     }).then(() => self.clients.claim())
@@ -56,10 +58,38 @@ self.addEventListener('fetch', (event) => {
   // Bypass chrome-extension and non-http(s) schemes
   if (!url.protocol.startsWith('http')) return;
 
-  // Bypass Supabase API, external analytics, and auth callbacks
+  // Cache public listing/avatar/agency images from Supabase Storage (Stale-while-revalidate)
+  const isSupabasePublicImage =
+    url.hostname.includes('supabase.co') &&
+    url.pathname.startsWith('/storage/v1/object/public/') &&
+    !url.pathname.includes('/listing-audios/') &&
+    !url.pathname.includes('/audios/');
+
+  if (isSupabasePublicImage) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE_NAME).then((cache) =>
+        cache.match(req).then((cachedResp) => {
+          const fetchPromise = fetch(req)
+            .then((networkResp) => {
+              if (networkResp && networkResp.status === 200) {
+                cache.put(req, networkResp.clone());
+              }
+              return networkResp;
+            })
+            .catch(() => cachedResp);
+
+          return cachedResp || fetchPromise;
+        })
+      )
+    );
+    return;
+  }
+
+  // Bypass Supabase REST/Auth API, external analytics, and local API callbacks
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('googleapis.com') ||
+    url.hostname.includes('googletagmanager.com') ||
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/rest/')
   ) {
