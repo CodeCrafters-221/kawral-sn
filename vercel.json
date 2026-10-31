@@ -33,6 +33,15 @@
           "value": "public, max-age=86400, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/(sitemap\\.xml|robots\\.txt)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -45,7 +54,19 @@
       "destination": "/terms.html"
     },
     {
-      "source": "/((?!robots\\.txt|favicon\\.ico|favicon\\.png|favicon-96x96\\.png|favicon-32\\.png|apple-touch-icon\\.png|site\\.webmanifest|manifest\\.json|sw\\.js|images/|assets/).*)",
+      "source": "/listings/:id",
+      "destination": "/api/seo?route=listing&id=:id"
+    },
+    {
+      "source": "/categories/:slug",
+      "destination": "/api/seo?route=category&slug=:slug"
+    },
+    {
+      "source": "/explorer",
+      "destination": "/api/seo?route=explorer"
+    },
+    {
+      "source": "/((?!api/|robots\\.txt|sitemap\\.xml|favicon\\.ico|favicon\\.png|favicon-96x96\\.png|favicon-32\\.png|apple-touch-icon\\.png|site\\.webmanifest|manifest\\.json|sw\\.js|images/|assets/).*)",
       "destination": "/index.html"
     }
   ]

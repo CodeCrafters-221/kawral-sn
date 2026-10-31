@@ -11,9 +11,35 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-ui': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-avatar',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-label',
+              '@radix-ui/react-select',
+              '@radix-ui/react-separator',
+              '@radix-ui/react-slot',
+              '@radix-ui/react-tabs',
+              '@radix-ui/react-toast',
+              '@radix-ui/react-tooltip',
+              'motion',
+              'sonner',
+            ],
+            'vendor-icons': ['lucide-react'],
+            'vendor-utils': ['zod', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+          },
+        },
+      },
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},

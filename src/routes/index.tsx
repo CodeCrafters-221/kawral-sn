@@ -10,6 +10,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import { SeoHead } from "../components/seo/SeoHead";
 import { supabase } from "../lib/supabase";
 import {
 	toSafeRegistrationAppRole,
@@ -121,7 +122,12 @@ const ProtectedRoute: React.FC<{
 	if (loading && !session && !currentUser) return <RouteLoadingFallback />;
 	if (!session && !currentUser)
 		return <Navigate to="/auth/login" replace />;
-	return <>{children}</>;
+	return (
+		<>
+			<SeoHead noIndex={true} />
+			{children}
+		</>
+	);
 };
 
 /** Filtre les annonces par catégorie via le slug URL */
@@ -171,7 +177,11 @@ const AuthRoute: React.FC = () => {
 	if (loading) return null;
 	if (isAuthenticated) return <Navigate to="/" replace />;
 
-	return <div className="flex-1" aria-hidden="true" />;
+	return (
+		<div className="flex-1" aria-hidden="true">
+			<SeoHead title="Connexion & Inscription | Kawral Sénégal" noIndex={true} />
+		</div>
+	);
 };
 
 /** Redirige l'utilisateur après l'authentification selon son rôle */
@@ -437,7 +447,12 @@ const RoleProtectedRoute: React.FC<{
 				: `/dashboard/${currentUser.role === "seller" ? "seller" : "client"}`;
 		return <Navigate to={fallback} replace />;
 	}
-	return <>{children}</>;
+	return (
+		<>
+			<SeoHead noIndex={true} />
+			{children}
+		</>
+	);
 };
 
 // --- App Routes ---

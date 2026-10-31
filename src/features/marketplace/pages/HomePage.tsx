@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { HeroSection } from "../components/HeroSection";
 import { ListingGrid } from "../../../components/marketplace/ListingGrid";
 import { BecomeSellerModal } from "../../../components/modals/BecomeSellerModal";
+import { SeoHead } from "../../../components/seo/SeoHead";
 import {
   ArrowRight,
   PlusCircle,
@@ -14,7 +15,7 @@ import { isCategoryMatching } from "../../../data/categoriesData";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { listings, setCurrentView, setFilters, filters, currentUser, isLoadingListings } = useApp();
+  const { listings, setCurrentView, setFilters, currentUser, isLoadingListings } = useApp();
   const [becomeSellerModalOpen, setBecomeSellerModalOpen] = useState(false);
 
   // Exactement 2 lignes sur desktop (8 annonces : 4 par ligne sur desktop, 2 par ligne sur mobile)
@@ -52,6 +53,42 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-10 sm:space-y-12" style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+      <SeoHead
+        title="Kawral | Achetez. Louez. Vendez. — Marketplace Sénégal"
+        description="Le point de rencontre de l'offre et de la demande au Sénégal : petites annonces directes (immobilier, véhicules, multimédia, mode, matériel pro). Achetez, louez et vendez sans intermédiaire."
+        canonicalPath="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Comment publier une annonce sur Kawral au Sénégal ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Créez gratuitement votre compte vendeur sur Kawral, ajoutez les photos, le prix en FCFA et la localisation de votre bien (Dakar, Thiès, Mbour, Saly, Saint-Louis...), puis publiez votre annonce en moins de 2 minutes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Comment contacter un propriétaire ou vendeur sur Kawral ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sur chaque annonce, vous pouvez contacter directement le vendeur par téléphone, par WhatsApp, via la messagerie interne sécurisée ou réserver un créneau de visite en ligne sans frais d'intermédiaire."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Quelles catégories d'annonces sont disponibles sur Kawral Sénégal ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kawral regroupe 8 grandes catégories au Sénégal : Immobilier (appartements, villas, studios, terrains, bureaux), Véhicules (voitures, motos, utilitaires, pièces), Électronique & Multimédia, Mode & Beauté, Maison & Meubles, Matériel Professionnel, Loisirs & Sport, et Services."
+              }
+            }
+          ]
+        }}
+      />
+
       {/* ── HERO SECTION : CARROUSEL 8 CATÉGORIES AVEC OVERLAY SOMBRE & CONTROLES ── */}
       <HeroSection />
 
@@ -66,16 +103,14 @@ export const HomePage: React.FC = () => {
               Trouvez votre bonheur parmi les annonces publiées au Sénégal
             </p>
           </div>
-          <button
-            onClick={() => {
-              setCurrentView("search");
-              navigate("/explorer");
-            }}
+          <Link
+            to="/explorer"
+            onClick={() => setCurrentView("search")}
             className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
           >
             <span>Voir toutes les annonces</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         <ListingGrid listings={featuredListings} showControls={false} skeletonCount={8} />
@@ -92,16 +127,14 @@ export const HomePage: React.FC = () => {
               Les annonces les mieux notées et les plus populaires
             </p>
           </div>
-          <button
-            onClick={() => {
-              setCurrentView("search");
-              navigate("/explorer");
-            }}
+          <Link
+            to="/explorer"
+            onClick={() => setCurrentView("search")}
             className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
           >
             <span>Voir toutes les annonces</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         <ListingGrid
@@ -125,13 +158,17 @@ export const HomePage: React.FC = () => {
                 Découvrez les meilleures offres immobilières
               </p>
             </div>
-            <button
-              onClick={() => navigateToCategory("immobilier")}
+            <Link
+              to="/categories/immobilier"
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToCategory("immobilier");
+              }}
               className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
             >
               <span>Voir toutes les annonces</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           <ListingGrid listings={realEstateListings} showControls={false} skeletonCount={4} prioritizeFirstRow={false} />
@@ -150,13 +187,17 @@ export const HomePage: React.FC = () => {
                 Trouvez les derniers gadgets et appareils électroniques
               </p>
             </div>
-            <button
-              onClick={() => navigateToCategory("electronique")}
+            <Link
+              to="/categories/electronique"
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToCategory("electronique");
+              }}
               className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
             >
               <span>Voir toutes les annonces</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           <ListingGrid listings={electronicsListings} showControls={false} skeletonCount={4} prioritizeFirstRow={false} />
@@ -205,42 +246,37 @@ export const HomePage: React.FC = () => {
                 <span>Devenir vendeur</span>
               </button>
             ) : !currentUser ? (
-              <button
-                type="button"
-                onClick={() => {
-                  navigate("/auth/register/seller");
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="bg-kawral-orange hover:bg-kawral-orange-hover text-white px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+              <Link
+                to="/auth/register/seller"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="bg-kawral-orange hover:bg-kawral-orange-hover text-white no-underline px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
               >
                 <PlusCircle className="w-4 h-4 text-white shrink-0" />
                 <span>Devenir vendeur</span>
-              </button>
+              </Link>
             ) : (
               <>
-                <button
-                  type="button"
+                <Link
+                  to="/dashboard/seller/listings/new"
                   onClick={() => {
                     setCurrentView("create-listing");
-                    navigate("/listings/create");
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="bg-kawral-orange hover:bg-kawral-orange-hover text-white px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                  className="bg-kawral-orange hover:bg-kawral-orange-hover text-white no-underline px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
                 >
                   <PlusCircle className="w-4 h-4 text-white shrink-0" />
                   <span>Publier une annonce</span>
-                </button>
-                <button
-                  type="button"
+                </Link>
+                <Link
+                  to="/dashboard/seller"
                   onClick={() => {
                     setCurrentView("seller-dashboard");
-                    navigate("/dashboard/seller");
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-3 sm:py-3.5 rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                  className="bg-white/10 hover:bg-white/20 text-white no-underline border border-white/20 px-4 py-3 sm:py-3.5 rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
                 >
                   <span>Mon tableau de bord</span>
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -252,6 +288,17 @@ export const HomePage: React.FC = () => {
         isOpen={becomeSellerModalOpen}
         onClose={() => setBecomeSellerModalOpen(false)}
       />
+
+      {/* Contenu éditorial sémantique longue traîne pour l'indexation des recherches locales au Sénégal */}
+      <section aria-label="Présentation de la marketplace Kawral au Sénégal" className="sr-only">
+        <h2>Kawral — Le site de petites annonces directes au Sénégal (Dakar et régions)</h2>
+        <p>
+          Bienvenue sur Kawral (kawral.sn), la plateforme sénégalaise dédiée à l'achat, la location et la vente en direct entre particuliers et professionnels. Trouvez des annonces vérifiées d'immobilier à Dakar (Almadies, Plateau, Mermoz, Sacré-Cœur, Ngor, Ouakam, Yoff, Parcelles Assainies, Pikine, Guédiawaye, Rufisque, Diamniadio), sur la Petite Côte (Mbour, Saly Portudal, Somone), à Thiès, Saint-Louis, Touba, Kaolack et Ziguinchor.
+        </p>
+        <p>
+          Comparez les prix en Franc CFA (FCFA) pour votre futur appartement, maison, villa, studio meublé, terrain titre foncier, voiture d'occasion, moto, téléphone iPhone ou Samsung, ordinateur portable, mobilier ou équipement professionnel, et prenez rendez-vous directement avec le vendeur sans commission.
+        </p>
+      </section>
     </div>
   );
 };

@@ -13,7 +13,9 @@ import { CheckCircle2, ShieldAlert, Shield, Check, Zap, ArrowLeft, ChevronLeft, 
 import { listingsService } from "../../../services/supabase/listingsService";
 import { ListingCard } from "../../../components/marketplace/ListingCard";
 import { Listing } from "../../../types";
-import { getCategoryLabel } from "../../../utils/formatters";
+import { getCategoryLabel, formatPriceFCFA } from "../../../utils/formatters";
+import { findParentMainCategory } from "../../../data/categoriesData";
+import { SeoHead } from "../../../components/seo/SeoHead";
 import { isAppointmentEligible } from "../../../utils/appointments";
 import { getCharacteristicsForCategory } from "../../../data/characteristicsRegistry";
 import { getListingRef } from "../../../utils/whatsapp";
@@ -199,6 +201,7 @@ export const ListingDetailPage: React.FC = () => {
   if (!listing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <SeoHead title="Annonce introuvable | Kawral" noIndex={true} />
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold text-kawral-dark">
             Annonce introuvable
@@ -285,6 +288,90 @@ export const ListingDetailPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-kawral-ivory pt-2 sm:pt-4 lg:pt-6 lg:pb-12">
+      <SeoHead
+        title={`${listing.title} — ${formatPriceFCFA(listing.price)} à ${listing.location.city} | Kawral`}
+        description={`${listing.transactionType === "rent" ? "À louer" : "À vendre"} à ${[listing.location.neighborhood, listing.location.city].filter(Boolean).join(", ") || "Sénégal"} (${formatPriceFCFA(listing.price)}) : ${listing.description || `${getCategoryLabel(listing.category)} disponible sur Kawral Sénégal.`}`}
+        canonicalPath={`/listings/${listing.id}`}
+        ogImage={listing.images?.[0]}
+        ogType="product"
+        noIndex={!isListingAvailable && listing.status === "archived"}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Accueil",
+                  "item": "https://www.kawral.sn/"
+                },
+                ...(findParentMainCategory(listing.category)
+                  ? [
+                      {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": findParentMainCategory(listing.category)!.label,
+                        "item": `https://www.kawral.sn/categories/${findParentMainCategory(listing.category)!.slug}`
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": getCategoryLabel(listing.category),
+                        "item": `https://www.kawral.sn/categories/${listing.category}`
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": listing.title,
+                        "item": `https://www.kawral.sn/listings/${listing.id}`
+                      }
+                    ]
+                  : [
+                      {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": getCategoryLabel(listing.category),
+                        "item": `https://www.kawral.sn/categories/${listing.category}`
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": listing.title,
+                        "item": `https://www.kawral.sn/listings/${listing.id}`
+                      }
+                    ])
+              ]
+            },
+            {
+              "@type": "Product",
+              "name": listing.title,
+              "description": listing.description || listing.title,
+              "image": listing.images,
+              "sku": listing.id,
+              "category": getCategoryLabel(listing.category),
+              "offers": {
+                "@type": "Offer",
+                "url": `https://www.kawral.sn/listings/${listing.id}`,
+                "priceCurrency": "XOF",
+                "price": listing.price,
+                "availability": isListingAvailable
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+                "areaServed": {
+                  "@type": "Place",
+                  "name": `${[listing.location.neighborhood, listing.location.city].filter(Boolean).join(", ") || "Dakar"}, Sénégal`
+                },
+                "seller": {
+                  "@type": "Person",
+                  "name": listing.owner.name || "Vendeur Kawral"
+                }
+              }
+            }
+          ]
+        }}
+      />
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
         
         {/* Navigation supérieure fluide : Bouton Retour et fil d'Ariane */}

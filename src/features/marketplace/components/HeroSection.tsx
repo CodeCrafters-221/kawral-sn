@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import {
   ArrowRight,
@@ -207,6 +207,7 @@ export const HeroSection: React.FC = () => {
 
         {/* Editorial Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight max-w-4xl drop-shadow-xl mb-3 sm:mb-4 animate-fade-in">
+          <span className="sr-only">Kawral — Petites annonces {activeSlide.categoryLabel} au Sénégal : </span>
           {activeSlide.title}
         </h1>
 
@@ -215,18 +216,21 @@ export const HeroSection: React.FC = () => {
           {activeSlide.description}
         </p>
 
-        {/* Orange CTA Action Button */}
+        {/* Orange CTA Action Link (Crawlable SEO) */}
         <div className="animate-fade-in">
-          <button
-            onClick={() => handleCategoryClick(activeSlide.categorySlug)}
-            className="group inline-flex items-center gap-2.5 bg-kawral-orange hover:bg-kawral-orange-hover text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-full font-black text-sm sm:text-base shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          <Link
+            to={`/categories/${activeSlide.categorySlug}`}
+            onClick={(e) => {
+              e.preventDefault();
+              handleCategoryClick(activeSlide.categorySlug);
+            }}
+            className="group inline-flex items-center gap-2.5 bg-kawral-orange hover:bg-kawral-orange-hover text-white no-underline px-7 sm:px-8 py-3.5 sm:py-4 rounded-full font-black text-sm sm:text-base shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
           >
             <span>{activeSlide.ctaText}</span>
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
-          </button>
+          </Link>
         </div>
       </div>
-
 
       {/* Position Dots & Play/Pause Controls */}
       <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-20 flex items-center justify-center gap-2 sm:gap-2.5">

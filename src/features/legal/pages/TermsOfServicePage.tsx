@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileText, CheckCircle2, ShieldAlert, Scale, AlertTriangle, Building, UserCheck, ShieldCheck, Mail, Globe } from 'lucide-react';
 import { LegalLayout, LegalSectionItem } from '../components/LegalLayout';
+import { SeoHead } from '../../../components/seo/SeoHead';
 
 const SECTIONS: LegalSectionItem[] = [
   { id: 'objet', title: '1. Objet et Présentation de la Plateforme' },
@@ -26,6 +27,11 @@ export const TermsOfServicePage: React.FC = () => {
       sections={SECTIONS}
     >
       {/* 1. Objet */}
+      <SeoHead
+        title="Conditions Générales d'Utilisation (CGU) — Kawral Sénégal"
+        description="Conditions Générales d'Utilisation (CGU) de la plateforme Kawral (https://www.kawral.sn) pour la publication et la recherche de petites annonces au Sénégal."
+        canonicalPath="/terms"
+      />
       <section id="objet" className="space-y-4 pt-2">
         <div className="flex items-center gap-2.5 text-kawral-green">
           <Building className="w-5 h-5 shrink-0" />

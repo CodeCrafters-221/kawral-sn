@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   MAIN_CATEGORIES_CATALOG,
   MainCategoryItem,
@@ -23,7 +24,7 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
   const [activeCategorySlug, setActiveCategorySlug] = useState<string | null>(
     null
   );
-  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout>>({} as any);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Determine which category is currently selected in app filters
@@ -36,7 +37,7 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
   const cancelCloseTimer = useCallback(() => {
     if (leaveTimerRef.current) {
       clearTimeout(leaveTimerRef.current);
-      leaveTimerRef.current = null;
+      leaveTimerRef.current = null as any;
     }
   }, []);
 
@@ -89,7 +90,8 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
   const activeCategory: MainCategoryItem | undefined =
     MAIN_CATEGORIES_CATALOG.find((c) => c.slug === activeCategorySlug);
 
-  const handleSelectCategory = (slug: string) => {
+  const handleSelectCategory = (e: React.MouseEvent, slug: string) => {
+    e.preventDefault();
     setActiveCategorySlug(null);
     cancelCloseTimer();
     onNavigateToCategory(slug);
@@ -137,13 +139,13 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
                 className="relative shrink-0"
                 onMouseEnter={() => handleCategoryHover(cat.slug)}
               >
-                <button
-                  type="button"
-                  onClick={() => handleSelectCategory(cat.slug)}
+                <Link
+                  to={`/categories/${cat.slug}`}
+                  onClick={(e) => handleSelectCategory(e, cat.slug)}
                   onFocus={() => handleCategoryHover(cat.slug)}
                   aria-expanded={isHovered}
                   aria-haspopup="true"
-                  className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold tracking-tight transition-all duration-200 ease-out active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-kawral-orange/40 ${buttonThemeClass}`}
+                  className={`relative inline-block no-underline px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold tracking-tight transition-all duration-200 ease-out active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-kawral-orange/40 ${buttonThemeClass}`}
                 >
                   {/* ABSOLUTE RULE: NO ARROWS, NO CHEVRONS, JUST THE PURE LABEL */}
                   <span>{cat.label}</span>
@@ -154,10 +156,28 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
                       className={`absolute bottom-0 left-2 right-2 h-0.5 rounded-full ${indicatorColor}`}
                     />
                   )}
-                </button>
+                </Link>
               </div>
             );
           })}
+        </nav>
+
+        {/* Index SEO complet des sous-catégories pour les moteurs de recherche (Mobile-First & Desktop) */}
+        <nav aria-label="Toutes les sous-catégories Kawral" className="sr-only">
+          <ul>
+            {MAIN_CATEGORIES_CATALOG.map((cat) => (
+              <li key={cat.slug}>
+                <Link to={`/categories/${cat.slug}`}>{cat.label} au Sénégal</Link>
+                <ul>
+                  {cat.subcategories.map((sub) => (
+                    <li key={sub.slug}>
+                      <Link to={`/categories/${sub.slug}`}>{sub.label} au Sénégal</Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
         </nav>
       </div>
 
@@ -214,14 +234,14 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleSelectCategory(activeCategory.slug)}
+                <Link
+                  to={`/categories/${activeCategory.slug}`}
+                  onClick={(e) => handleSelectCategory(e, activeCategory.slug)}
                   className="flex items-center gap-1.5 text-xs font-bold text-kawral-orange hover:text-kawral-orange-hover hover:underline transition-colors cursor-pointer group"
                 >
                   <span>Toutes les annonces en {activeCategory.label}</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                </button>
+                </Link>
               </div>
 
               {/* Multi-column grid of subcategories */}
@@ -244,11 +264,11 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
                     : "bg-slate-100/70 text-slate-600 group-hover:text-kawral-green group-hover:bg-emerald-50";
 
                   return (
-                    <button
+                    <Link
                       key={sub.slug}
-                      type="button"
-                      onClick={() => handleSelectCategory(sub.slug)}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all duration-150 cursor-pointer group ${subItemClass}`}
+                      to={`/categories/${sub.slug}`}
+                      onClick={(e) => handleSelectCategory(e, sub.slug)}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left no-underline transition-all duration-150 cursor-pointer group ${subItemClass}`}
                     >
                       <span
                         className={`p-1.5 rounded-lg transition-colors shrink-0 ${subIconBoxClass}`}
@@ -258,7 +278,7 @@ export const NavbarCategoriesBar: React.FC<NavbarCategoriesBarProps> = ({
                       <span className="text-xs font-medium leading-tight line-clamp-1 transition-colors">
                         {sub.label}
                       </span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
