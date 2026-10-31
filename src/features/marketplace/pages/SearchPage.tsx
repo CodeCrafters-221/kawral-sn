@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { useApp } from "../../../context/AppContext";
 import { useFilteredListings } from "../../../context/hooks/useFilteredListings";
 import { FilterSidebar } from "../../../components/marketplace/FilterSidebar";
@@ -7,6 +8,9 @@ import { ListingGrid } from "../../../components/marketplace/ListingGrid";
 import { ListingMap } from "../../../components/marketplace/ListingMap";
 import { SortDropdown } from "../../../components/marketplace/SortDropdown";
 import { Dialog, DialogContent, DialogTitle } from "../../../components/ui";
+import { SeoHead } from "../../../components/seo/SeoHead";
+import { MAIN_CATEGORIES_CATALOG, findMainCategory, findParentMainCategory } from "../../../data/categoriesData";
+import { getCategoryLabel } from "../../../utils/formatters";
 import { SlidersHorizontal, Map as MapIcon, LayoutGrid, Loader2 } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -22,8 +26,17 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export const SearchPage: React.FC = () => {
   const { listings, filters, setFilters } = useApp();
+  const [searchParams] = useSearchParams();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+
+  // Support URL query parameter ?q=... (e.g. Google Sitelinks Searchbox)
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null && q.trim() !== "" && q !== filters.search) {
+      setFilters((prev) => ({ ...prev, search: q.trim() }));
+    }
+  }, [searchParams, setFilters]);
 
   const { results: sortedListings, isLoading } = useFilteredListings(filters, listings);
   const count = sortedListings.length;
@@ -35,11 +48,122 @@ export const SearchPage: React.FC = () => {
     (filters.priceMin !== null || filters.priceMax !== null ? 1 : 0);
 
   // Sous-titre contextuel : « 6 annonces · "villa" · Immobilier · Dakar »
+  const activeCatLabel = filters.category
+    ? CATEGORY_LABELS[filters.category] ?? getCategoryLabel(filters.category as any) ?? filters.category
+    : "";
   const context = [
     filters.search && `« ${filters.search} »`,
-    filters.category && (CATEGORY_LABELS[filters.category] ?? filters.category),
+    activeCatLabel,
     filters.location,
   ].filter(Boolean) as string[];
+
+  // Métadonnées SEO dynamiques selon la catégorie ou la recherche
+  const mainCat = filters.category ? findMainCategory(filters.category) : undefined;
+  const parentCat = filters.category ? findParentMainCategory(filters.category) : undefined;
+  const seoTitle = filters.category
+    ? `${activeCatLabel} au Sénégal — Petites annonces ${
+        parentCat && parentCat.slug !== filters.category ? `${parentCat.label} ` : ""
+      }| Kawral`
+    : "Explorer toutes les petites annonces au Sénégal | Kawral Marketplace";
+  const seoDescription = mainCat?.description
+    ? `${mainCat.description} Achetez, louez et vendez en direct au Sénégal (Dakar et régions) sans intermédiaire sur Kawral.`
+    : filters.category
+      ? `Découvrez toutes les annonces de ${activeCatLabel.toLowerCase()} à vendre ou à louer au Sénégal (Dakar, Thiès, Mbour, Saint-Louis). Contact direct sur Kawral.`
+      : "Parcourez toutes les petites annonces publiées au Sénégal : immobilier, véhicules, électronique, mode, maison et matériel professionnel sur Kawral.";
+  const canonicalPath = filters.category ? `/categories/${filters.category}` : "/explorer";
+
+  const activeCatalogCategory = parentCat || mainCat;
+
+  const searchPageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `https://www.kawral.sn${canonicalPath}#collection`,
+        "url": `https://www.kawral.sn${canonicalPath}`,
+        "name": seoTitle,
+        "description": seoDescription,
+        "inLanguage": "fr-SN",
+        "isPartOf": {
+          "@id": "https://www.kawral.sn/#website"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": filters.category
+          ? [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://www.kawral.sn/"
+              },
+              ...(parentCat && parentCat.slug !== filters.category
+                ? [
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "name": parentCat.label,
+                      "item": `https://www.kawral.sn/categories/${parentCat.slug}`
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 3,
+                      "name": activeCatLabel,
+                      "item": `https://www.kawral.sn/categories/${filters.category}`
+                    }
+                  ]
+                : [
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "name": activeCatLabel,
+                      "item": `https://www.kawral.sn/categories/${filters.category}`
+                    }
+                  ])
+            ]
+          : [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://www.kawral.sn/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Explorer les annonces",
+                "item": "https://www.kawral.sn/explorer"
+              }
+            ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": filters.category
+              ? `Comment trouver une annonce ${activeCatLabel.toLowerCase()} fiable au Sénégal sur Kawral ?`
+              : "Comment acheter ou louer en direct au Sénégal sur Kawral ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": filters.category
+                ? `Utilisez les filtres par ville (Dakar, Almadies, Plateau, Mermoz, Pikine, Thiès, Mbour/Saly, Saint-Louis) et par budget en FCFA pour comparer les offres de ${activeCatLabel.toLowerCase()} et contacter directement le propriétaire ou vendeur par téléphone, messagerie ou WhatsApp sans commission.`
+                : "Parcourez les annonces vérifiées par catégorie et par région au Sénégal, puis contactez directement l'annonceur par appel, WhatsApp ou messagerie intégrée sans aucun frais d'intermédiaire."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "La publication et la prise de contact sur Kawral sont-elles directes ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui, Kawral met en relation directe les vendeurs, bailleurs et acheteurs partout au Sénégal avec prise de rendez-vous en ligne et contact WhatsApp instantané."
+            }
+          }
+        ]
+      }
+    ]
+  };
 
   const segBtn = (mode: "grid" | "map", Icon: React.ElementType, label: string) => (
     <button
@@ -61,9 +185,19 @@ export const SearchPage: React.FC = () => {
       className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-5 sm:pt-8 animate-fade-in"
       style={{ paddingBottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}
     >
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        canonicalPath={canonicalPath}
+        jsonLd={searchPageJsonLd}
+      />
+
       {/* En-tête */}
       <header className="mb-5 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Explorer les annonces</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Explorer les annonces
+          {activeCatLabel && <span className="sr-only"> — {activeCatLabel} au Sénégal</span>}
+        </h1>
         <p className="mt-1 text-sm text-slate-500 flex flex-wrap items-center gap-x-1.5" aria-live="polite">
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin text-kawral-green" />
@@ -141,6 +275,50 @@ export const SearchPage: React.FC = () => {
           )}
         </section>
       </div>
+
+      {/* Bloc éditorial sémantique longue traîne pour l'indexation par catégorie et localité au Sénégal */}
+      <section
+        aria-label="Informations sur les petites annonces au Sénégal"
+        className="sr-only"
+      >
+        <h2>
+          {activeCatLabel
+            ? `Petites annonces ${activeCatLabel} à vendre et à louer au Sénégal`
+            : "Toutes les petites annonces gratuites au Sénégal sur Kawral"}
+        </h2>
+        <p>
+          {activeCatLabel
+            ? `Consultez les meilleures offres de ${activeCatLabel.toLowerCase()} publiées sur Kawral, la marketplace de référence au Sénégal. Que vous recherchiez à Dakar (Almadies, Ngor, Ouakam, Yoff, Mermoz, Sacré-Cœur, Point E, Fann, Plateau, Hann Maristes, Parcelles Assainies, Pikine, Guédiawaye, Rufisque, Keur Massar, Diamniadio) ou dans les régions (Thiès, Mbour, Saly Portudal, Saint-Louis, Touba, Kaolack, Ziguinchor, Cap Skirring, Diourbel, Louga, Tambacounda, Kolda), échangez directement avec les propriétaires et vendeurs vérifiés en Franc CFA (FCFA) sans frais d'agence.`
+            : "Kawral connecte acheteurs, locataires et vendeurs dans toutes les régions du Sénégal : Dakar, Thiès, Mbour, Saly, Saint-Louis, Touba, Kaolack et Ziguinchor. Trouvez un appartement, une villa, un terrain avec titre foncier, une voiture d'occasion, un smartphone, de l'électroménager ou du matériel professionnel au meilleur prix en FCFA."}
+        </p>
+        {activeCatalogCategory ? (
+          <nav aria-label={`Sous-catégories ${activeCatalogCategory.label}`}>
+            <h3>Parcourir les rubriques {activeCatalogCategory.label} au Sénégal</h3>
+            <ul>
+              {activeCatalogCategory.subcategories.map((sub) => (
+                <li key={sub.slug}>
+                  <Link to={`/categories/${sub.slug}`}>
+                    {sub.label} à vendre et à louer à Dakar et au Sénégal
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : (
+          <nav aria-label="Catégories principales au Sénégal">
+            <h3>Explorer par catégorie sur Kawral Sénégal</h3>
+            <ul>
+              {MAIN_CATEGORIES_CATALOG.map((cat) => (
+                <li key={cat.slug}>
+                  <Link to={`/categories/${cat.slug}`}>
+                    {cat.label} au Sénégal — {cat.description}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </section>
     </div>
   );
 };

@@ -8,6 +8,7 @@
     <title>Kawral | Achetez. Louez. Vendez. — Marketplace Sénégal</title>
     <meta name="description" content="Le point de rencontre de l'offre et de la demande au Sénégal : petites annonces directes (immobilier, véhicules, multimédia, mode, matériel pro). Achetez, louez et vendez sans intermédiaire." />
     <meta name="author" content="Kawral" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#123C36" />
     <link rel="canonical" href="https://www.kawral.sn/" />
 
@@ -47,10 +48,37 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Kawral",
-        "url": "https://www.kawral.sn/",
-        "logo": "https://www.kawral.sn/images/kawral-app-icon.png"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.kawral.sn/#organization",
+            "name": "Kawral",
+            "url": "https://www.kawral.sn/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.kawral.sn/images/kawral-app-icon.png",
+              "width": 512,
+              "height": 512
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Sénégal"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.kawral.sn/#website",
+            "url": "https://www.kawral.sn/",
+            "name": "Kawral — Marketplace Sénégal",
+            "inLanguage": "fr-SN",
+            "publisher": { "@id": "https://www.kawral.sn/#organization" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.kawral.sn/explorer?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
       }
     </script>
 

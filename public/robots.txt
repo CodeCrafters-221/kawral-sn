@@ -6,6 +6,9 @@ Allow: /favicon-96x96.png
 Allow: /favicon-32.png
 Allow: /apple-touch-icon.png
 Allow: /images/
+Disallow: /admin
+Disallow: /dashboard/
+Disallow: /auth/
 
 User-agent: Googlebot-Image
 Allow: /
@@ -18,3 +21,8 @@ Allow: /images/
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard/
+Disallow: /auth/
+
+Sitemap: https://www.kawral.sn/sitemap.xml

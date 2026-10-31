@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield, Lock, FileText, CheckCircle2, AlertTriangle, UserCheck, Trash2, KeyRound, Globe, ExternalLink } from 'lucide-react';
 import { LegalLayout, LegalSectionItem } from '../components/LegalLayout';
+import { SeoHead } from '../../../components/seo/SeoHead';
 
 const SECTIONS: LegalSectionItem[] = [
   { id: 'introduction', title: '1. Introduction et Responsable de Traitement' },
@@ -26,6 +27,11 @@ export const PrivacyPolicyPage: React.FC = () => {
       sections={SECTIONS}
     >
       {/* 1. Introduction */}
+      <SeoHead
+        title="Politique de Confidentialité — Kawral Sénégal"
+        description="Politique de Confidentialité de la plateforme Kawral (https://www.kawral.sn). Détail de la collecte, de l'utilisation et de la protection des données personnelles au Sénégal."
+        canonicalPath="/privacy"
+      />
       <section id="introduction" className="space-y-4 pt-2">
         <div className="flex items-center gap-2.5 text-kawral-green">
           <FileText className="w-5 h-5 shrink-0" />

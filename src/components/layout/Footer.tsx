@@ -15,10 +15,10 @@ import {
 export const Footer: React.FC = () => {
   const { setCurrentView, setFilters } = useApp();
 
-  const navigateToCategory = (cat: string) => {
+  const handleCategoryClick = (cat: string) => {
     setFilters((prev) => ({
       ...prev,
-      category: cat
+      category: cat,
     }));
     setCurrentView('search');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -38,9 +38,9 @@ export const Footer: React.FC = () => {
           
           {/* Colonne 1 : Kawral Sénégal */}
           <div className="space-y-3.5">
-            <div onClick={handleGoHome} className="cursor-pointer inline-block" title="Retour à l'accueil Kawral">
+            <Link to="/" onClick={handleGoHome} className="cursor-pointer inline-block no-underline" title="Retour à l'accueil Kawral">
               <KawralLogo showTagline={true} size="lg" variant="dark" />
-            </div>
+            </Link>
             <p className="text-xs text-slate-300 leading-relaxed">
               Kawral est le point de rencontre de l'offre et de la demande au Sénégal pour acheter, louer et vendre en toute sérénité. Immobilier, véhicules, multimédia, mode ou matériel pro : concluez vos affaires en direct.
             </p>
@@ -72,49 +72,50 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Colonne 2 : Catégories phares */}
+          {/* Colonne 2 : Catégories phares (liens crawlables SEO) */}
           <div>
             <h5 className="font-bold text-sm tracking-wide uppercase mb-3 text-kawral-orange">
               Catégories
             </h5>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
-                <button onClick={() => navigateToCategory('immobilier')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/immobilier" onClick={() => handleCategoryClick('immobilier')} className="hover:text-white transition-colors cursor-pointer">
                   Immobilier (Vente & Location)
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('vehicules')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/vehicules" onClick={() => handleCategoryClick('vehicules')} className="hover:text-white transition-colors cursor-pointer">
                   Véhicules & Voitures
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('electronique')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/electronique" onClick={() => handleCategoryClick('electronique')} className="hover:text-white transition-colors cursor-pointer">
                   Électronique & Multimédia
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('mode')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/mode" onClick={() => handleCategoryClick('mode')} className="hover:text-white transition-colors cursor-pointer">
                   Mode & Vêtements
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('maison-jardin')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/maison-jardin" onClick={() => handleCategoryClick('maison-jardin')} className="hover:text-white transition-colors cursor-pointer">
                   Maison & Équipements
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('materiel-pro')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/materiel-pro" onClick={() => handleCategoryClick('materiel-pro')} className="hover:text-white transition-colors cursor-pointer">
                   Matériel Professionnel
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => navigateToCategory('loisirs')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/categories/loisirs" onClick={() => handleCategoryClick('loisirs')} className="hover:text-white transition-colors cursor-pointer">
                   Loisirs & Sports
-                </button>
+                </Link>
               </li>
               <li className="pt-0.5">
-                <button
+                <Link
+                  to="/explorer"
                   onClick={() => {
                     setCurrentView('search');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -123,7 +124,7 @@ export const Footer: React.FC = () => {
                 >
                   <span>Explorer toutes les annonces</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -135,38 +136,39 @@ export const Footer: React.FC = () => {
             </h5>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
-                <button
+                <Link
+                  to="/dashboard/seller/listings/new"
                   onClick={() => setCurrentView('create-listing')}
                   className="hover:text-white transition-colors font-bold text-kawral-orange cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>Publier une annonce gratuite</span>
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => setCurrentView('seller-dashboard')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/dashboard/seller" onClick={() => setCurrentView('seller-dashboard')} className="hover:text-white transition-colors cursor-pointer">
                   Espace Vendeur (Gestion de mes annonces)
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => setCurrentView('client-dashboard')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/dashboard/client" onClick={() => setCurrentView('client-dashboard')} className="hover:text-white transition-colors cursor-pointer">
                   Mon Espace Client
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => setCurrentView('appointments')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/appointments" onClick={() => setCurrentView('appointments')} className="hover:text-white transition-colors cursor-pointer">
                   Mes Rendez-vous de visite
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => setCurrentView('messaging')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/dashboard/client/messages" onClick={() => setCurrentView('messaging')} className="hover:text-white transition-colors cursor-pointer">
                   Messagerie & Échanges
-                </button>
+                </Link>
               </li>
               <li>
-                <button onClick={() => setCurrentView('search')} className="hover:text-white transition-colors cursor-pointer">
+                <Link to="/explorer" onClick={() => setCurrentView('search')} className="hover:text-white transition-colors cursor-pointer">
                   Recherche & Filtres avancés
-                </button>
+                </Link>
               </li>
               <li className="pt-0.5">
                 <a
@@ -211,12 +213,13 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <button
+                <Link
+                  to="/admin"
                   onClick={() => setCurrentView('admin-dashboard')}
                   className="hover:text-white transition-colors text-slate-400 text-[11px] cursor-pointer pt-1 block"
                 >
                   Espace Administration
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
