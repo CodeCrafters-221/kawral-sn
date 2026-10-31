@@ -26,6 +26,91 @@ const ALLOWED_IMAGE_MIME_TO_EXT: Record<string, string> = {
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
 
 /**
+ * Compresse et redimensionne une image côté client (via HTMLCanvasElement)
+ * avant son envoi vers Supabase Storage afin d'éviter les fichiers de plusieurs Mo.
+ */
+async function compressImageFile(
+  file: File,
+  maxDimension = 1280,
+  quality = 0.82
+): Promise<File> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return file;
+  }
+  // Si l'image est déjà très légère (< 120 Ko) et au format WebP/JPEG, on évite une recompression inutile
+  if (file.size < 120 * 1024 && (file.type === 'image/webp' || file.type === 'image/jpeg')) {
+    return file;
+  }
+
+  return new Promise<File>((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      try {
+        let width = img.naturalWidth || img.width;
+        let height = img.naturalHeight || img.height;
+
+        if (!width || !height) {
+          resolve(file);
+          return;
+        }
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width >= height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const targetMime = 'image/webp';
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || blob.size >= file.size) {
+              resolve(file);
+              return;
+            }
+            const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const baseName = file.name.replace(/\.[^.]+$/, '') || 'image';
+            const compressedFile = new File([blob], `${baseName}.${ext}`, {
+              type: blob.type || targetMime,
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          targetMime,
+          quality
+        );
+      } catch {
+        resolve(file);
+      }
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+
+    img.src = objectUrl;
+  });
+}
+
+/**
  * Valide un fichier image (taille, MIME type et extension) et retourne
  * l'extension et le contentType sûrs (bloque SVG, HTML et scripts).
  */
@@ -118,7 +203,8 @@ export async function uploadListingImage(
     return null;
   }
 
-  const validated = validateImageFile(file, MAX_IMAGE_SIZE_BYTES);
+  const optimizedFile = await compressImageFile(file, 1280, 0.82);
+  const validated = validateImageFile(optimizedFile, MAX_IMAGE_SIZE_BYTES);
   if (!validated) return null;
 
   try {
@@ -127,9 +213,9 @@ export async function uploadListingImage(
 
     const { error } = await supabase.storage
       .from('listing-images')
-      .upload(filePath, file, {
+      .upload(filePath, optimizedFile, {
         upsert: false,
-        cacheControl: '3600',
+        cacheControl: '31536000',
         contentType: validated.contentType,
       });
 
@@ -186,7 +272,8 @@ export async function uploadAvatar(
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !isUUID(userId) || !file) return null;
 
-  const validated = validateImageFile(file, MAX_AVATAR_SIZE_BYTES);
+  const optimizedFile = await compressImageFile(file, 512, 0.82);
+  const validated = validateImageFile(optimizedFile, MAX_AVATAR_SIZE_BYTES);
   if (!validated) return null;
 
   try {
@@ -195,9 +282,9 @@ export async function uploadAvatar(
 
     const { error } = await supabase.storage
       .from('avatars')
-      .upload(filePath, file, {
+      .upload(filePath, optimizedFile, {
         upsert: true,
-        cacheControl: '3600',
+        cacheControl: '31536000',
         contentType: validated.contentType,
       });
 
@@ -239,7 +326,8 @@ export async function uploadAgencyAsset(
     return null;
   }
 
-  const validated = validateImageFile(file, MAX_IMAGE_SIZE_BYTES);
+  const optimizedFile = await compressImageFile(file, 1280, 0.82);
+  const validated = validateImageFile(optimizedFile, MAX_IMAGE_SIZE_BYTES);
   if (!validated) return null;
 
   const safeType =
@@ -251,9 +339,9 @@ export async function uploadAgencyAsset(
 
     const { error } = await supabase.storage
       .from('agency-assets')
-      .upload(filePath, file, {
+      .upload(filePath, optimizedFile, {
         upsert: true,
-        cacheControl: '3600',
+        cacheControl: '31536000',
         contentType: validated.contentType,
       });
 

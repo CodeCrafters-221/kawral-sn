@@ -41,6 +41,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           style={{ height: '100%' }}
           fallback={FALLBACK_IMG}
           loading={imageLoading}
+          fetchPriority={imageLoading === 'eager' ? 'high' : 'auto'}
+          optimizeWidth={600}
           decoding="async"
         />
 
