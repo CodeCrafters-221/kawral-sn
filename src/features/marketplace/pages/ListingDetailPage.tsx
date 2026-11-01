@@ -20,6 +20,7 @@ import { isAppointmentEligible } from "../../../utils/appointments";
 import { getCharacteristicsForCategory } from "../../../data/characteristicsRegistry";
 import { getListingRef } from "../../../utils/whatsapp";
 import { trackMarketingEvent } from "../../../lib/analytics";
+import { getListingSeoMetadata } from "../../../data/seoCategoryMetadata.js";
 
 export const ListingDetailPage: React.FC = () => {
   const {
@@ -222,6 +223,17 @@ export const ListingDetailPage: React.FC = () => {
   // Rendez-vous uniquement pour l'immobilier et les véhicules si l'annonce est en ligne
   const canBookAppointment = isAppointmentEligible(listing.category) && isListingAvailable;
   const listingRef = getListingRef(listing.id);
+  const listingLocation = [
+    listing.location.neighborhood,
+    listing.location.city,
+  ].filter(Boolean).join(", ");
+  const listingSeo = getListingSeoMetadata({
+    title: listing.title,
+    categoryLabel: listing.categoryLabel,
+    location: listing.location.address || listing.location.city,
+    transactionType: listing.transactionType,
+    description: listing.description,
+  });
 
   const handleChat = () => {
     if (!currentUser) {
@@ -289,12 +301,12 @@ export const ListingDetailPage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-kawral-ivory pt-2 sm:pt-4 lg:pt-6 lg:pb-12">
       <SeoHead
-        title={`${listing.title} — ${formatPriceFCFA(listing.price)} à ${listing.location.city} | Kawral`}
-        description={`${listing.transactionType === "rent" ? "À louer" : "À vendre"} à ${[listing.location.neighborhood, listing.location.city].filter(Boolean).join(", ") || "Sénégal"} (${formatPriceFCFA(listing.price)}) : ${listing.description || `${getCategoryLabel(listing.category)} disponible sur Kawral Sénégal.`}`}
+        title={listingSeo.title}
+        description={listingSeo.description}
         canonicalPath={`/listings/${listing.id}`}
         ogImage={listing.images?.[0]}
         ogType="product"
-        noIndex={!isListingAvailable && listing.status === "archived"}
+        noIndex={!isListingAvailable}
         jsonLd={{
           "@context": "https://schema.org",
           "@graph": [
@@ -355,18 +367,28 @@ export const ListingDetailPage: React.FC = () => {
                 "@type": "Offer",
                 "url": `https://www.kawral.sn/listings/${listing.id}`,
                 "priceCurrency": "XOF",
-                "price": listing.price,
+                ...(Number.isFinite(listing.price) && listing.price > 0
+                  ? { "price": listing.price }
+                  : {}),
                 "availability": isListingAvailable
                   ? "https://schema.org/InStock"
                   : "https://schema.org/OutOfStock",
-                "areaServed": {
-                  "@type": "Place",
-                  "name": `${[listing.location.neighborhood, listing.location.city].filter(Boolean).join(", ") || "Dakar"}, Sénégal`
-                },
-                "seller": {
-                  "@type": "Person",
-                  "name": listing.owner.name || "Vendeur Kawral"
-                }
+                ...(listingLocation
+                  ? {
+                      "areaServed": {
+                        "@type": "Place",
+                        "name": `${listingLocation}, Sénégal`
+                      }
+                    }
+                  : {}),
+                ...(listing.owner.name && listing.owner.name !== "Vendeur Kawral"
+                  ? {
+                      "seller": {
+                        "@type": "Person",
+                        "name": listing.owner.name
+                      }
+                    }
+                  : {})
               }
             }
           ]

@@ -75,7 +75,19 @@
       "destination": "/api/seo?route=listing&id=:id"
     },
     {
+      "source": "/annonces/:id",
+      "destination": "/api/seo?route=listing&id=:id"
+    },
+    {
+      "source": "/annonce/:id",
+      "destination": "/api/seo?route=listing&id=:id"
+    },
+    {
       "source": "/categories/:slug",
+      "destination": "/api/seo?route=category&slug=:slug"
+    },
+    {
+      "source": "/explorer/:slug",
       "destination": "/api/seo?route=category&slug=:slug"
     },
     {

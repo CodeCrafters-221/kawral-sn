@@ -12,6 +12,7 @@ import { SeoHead } from "../../../components/seo/SeoHead";
 import { MAIN_CATEGORIES_CATALOG, findMainCategory, findParentMainCategory } from "../../../data/categoriesData";
 import { getCategoryLabel } from "../../../utils/formatters";
 import { SlidersHorizontal, Map as MapIcon, LayoutGrid, Loader2 } from "lucide-react";
+import { SEO_CATEGORY_METADATA } from "../../../data/seoCategoryMetadata.js";
 
 const CATEGORY_LABELS: Record<string, string> = {
   immobilier: "Immobilier",
@@ -60,16 +61,15 @@ export const SearchPage: React.FC = () => {
   // Métadonnées SEO dynamiques selon la catégorie ou la recherche
   const mainCat = filters.category ? findMainCategory(filters.category) : undefined;
   const parentCat = filters.category ? findParentMainCategory(filters.category) : undefined;
-  const seoTitle = filters.category
-    ? `${activeCatLabel} au Sénégal — Petites annonces ${
-        parentCat && parentCat.slug !== filters.category ? `${parentCat.label} ` : ""
-      }| Kawral`
-    : "Explorer toutes les petites annonces au Sénégal | Kawral Marketplace";
-  const seoDescription = mainCat?.description
-    ? `${mainCat.description} Achetez, louez et vendez en direct au Sénégal (Dakar et régions) sans intermédiaire sur Kawral.`
-    : filters.category
-      ? `Découvrez toutes les annonces de ${activeCatLabel.toLowerCase()} à vendre ou à louer au Sénégal (Dakar, Thiès, Mbour, Saint-Louis). Contact direct sur Kawral.`
-      : "Parcourez toutes les petites annonces publiées au Sénégal : immobilier, véhicules, électronique, mode, maison et matériel professionnel sur Kawral.";
+  const categorySeo = filters.category
+    ? SEO_CATEGORY_METADATA[filters.category]
+    : undefined;
+  const seoTitle = categorySeo?.title
+    || "Toutes les petites annonces au Sénégal | Kawral";
+  const seoDescription = categorySeo?.description
+    || (filters.category
+      ? `Annonces de ${activeCatLabel.toLowerCase()} au Sénégal. Consultez les offres et contactez directement l'annonceur sur Kawral.`
+      : "Parcourez les petites annonces publiées au Sénégal : immobilier, véhicules, électronique, mode, maison et matériel professionnel sur Kawral.");
   const canonicalPath = filters.category ? `/categories/${filters.category}` : "/explorer";
 
   const activeCatalogCategory = parentCat || mainCat;
@@ -137,31 +137,6 @@ export const SearchPage: React.FC = () => {
               }
             ]
       },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": filters.category
-              ? `Comment trouver une annonce ${activeCatLabel.toLowerCase()} fiable au Sénégal sur Kawral ?`
-              : "Comment acheter ou louer en direct au Sénégal sur Kawral ?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": filters.category
-                ? `Utilisez les filtres par ville (Dakar, Almadies, Plateau, Mermoz, Pikine, Thiès, Mbour/Saly, Saint-Louis) et par budget en FCFA pour comparer les offres de ${activeCatLabel.toLowerCase()} et contacter directement le propriétaire ou vendeur par téléphone, messagerie ou WhatsApp sans commission.`
-                : "Parcourez les annonces vérifiées par catégorie et par région au Sénégal, puis contactez directement l'annonceur par appel, WhatsApp ou messagerie intégrée sans aucun frais d'intermédiaire."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "La publication et la prise de contact sur Kawral sont-elles directes ?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Oui, Kawral met en relation directe les vendeurs, bailleurs et acheteurs partout au Sénégal avec prise de rendez-vous en ligne et contact WhatsApp instantané."
-            }
-          }
-        ]
-      }
     ]
   };
 
@@ -189,6 +164,7 @@ export const SearchPage: React.FC = () => {
         title={seoTitle}
         description={seoDescription}
         canonicalPath={canonicalPath}
+        noIndex={Boolean(filters.category && !categorySeo)}
         jsonLd={searchPageJsonLd}
       />
 

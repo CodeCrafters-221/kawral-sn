@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
+    "test:seo": "tsx --test tests/seo.test.ts",
     "test:k6:smoke": "k6 run tests/k6/scenarios/smoke.js",
     "test:k6:load": "k6 run tests/k6/scenarios/load.js",
     "test:k6:stress": "k6 run tests/k6/scenarios/stress.js",
