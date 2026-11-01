@@ -207,7 +207,9 @@ export const HeroSection: React.FC = () => {
 
         {/* Editorial Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight max-w-4xl drop-shadow-xl mb-3 sm:mb-4 animate-fade-in">
-          <span className="sr-only">Kawral — Petites annonces {activeSlide.categoryLabel} au Sénégal : </span>
+          <span className="block text-sm sm:text-base lg:text-lg font-bold tracking-normal text-slate-100 mb-3">
+            Kawral, marketplace de petites annonces au Sénégal
+          </span>
           {activeSlide.title}
         </h1>
 

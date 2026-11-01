@@ -1,86 +1,17 @@
+import {
+  getListingSeoMetadata,
+  SEO_CATEGORY_METADATA,
+} from '../src/data/seoCategoryMetadata.js';
+
 const SITE_ORIGIN = 'https://www.kawral.sn';
 const DEFAULT_IMAGE = `${SITE_ORIGIN}/favicon-96x96.png`;
-
-const CATEGORY_CATALOG = {
-  immobilier: { label: 'Immobilier', desc: 'Vente & location de biens immobiliers (appartements, villas, terrains, studios, bureaux)' },
-  apartment: { label: 'Appartements', parent: 'immobilier', parentLabel: 'Immobilier' },
-  house: { label: 'Maisons et villas', parent: 'immobilier', parentLabel: 'Immobilier' },
-  room: { label: 'Chambres', parent: 'immobilier', parentLabel: 'Immobilier' },
-  studios: { label: 'Studios', parent: 'immobilier', parentLabel: 'Immobilier' },
-  land: { label: 'Terrains', parent: 'immobilier', parentLabel: 'Immobilier' },
-  commercial: { label: 'Locaux commerciaux', parent: 'immobilier', parentLabel: 'Immobilier' },
-  bureaux: { label: 'Bureaux', parent: 'immobilier', parentLabel: 'Immobilier' },
-  entrepots: { label: 'Entrepôts', parent: 'immobilier', parentLabel: 'Immobilier' },
-
-  vehicules: { label: 'Véhicules', desc: 'Voitures, motos, utilitaires, camions et pièces détachées' },
-  voitures: { label: 'Voitures', parent: 'vehicules', parentLabel: 'Véhicules' },
-  motos: { label: 'Motos et scooters', parent: 'vehicules', parentLabel: 'Véhicules' },
-  camions: { label: 'Camions', parent: 'vehicules', parentLabel: 'Véhicules' },
-  bus: { label: 'Bus et minibus', parent: 'vehicules', parentLabel: 'Véhicules' },
-  utilitaires: { label: 'Véhicules utilitaires', parent: 'vehicules', parentLabel: 'Véhicules' },
-  'pieces-detachees': { label: 'Pièces détachées', parent: 'vehicules', parentLabel: 'Véhicules' },
-  'pneus-jantes': { label: 'Pneus et jantes', parent: 'vehicules', parentLabel: 'Véhicules' },
-  'accessoires-auto': { label: 'Accessoires auto/moto', parent: 'vehicules', parentLabel: 'Véhicules' },
-
-  'materiel-pro': { label: 'Matériel Professionnel', desc: 'Équipements pour entreprises, chantiers, commerces et ateliers' },
-  'materiel-btp': { label: 'Matériel BTP & chantier', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'outils-bricolage': { label: 'Outils et bricolage', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'equipement-bureau': { label: 'Équipement de bureau', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'materiel-restauration': { label: 'Matériel de restauration', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'materiel-agricole': { label: 'Matériel agricole', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'materiel-medical': { label: 'Matériel médical', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'imprimerie-industrie': { label: 'Imprimerie & industrie', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-  'fournitures-commerce': { label: 'Fournitures de commerce', parent: 'materiel-pro', parentLabel: 'Matériel Professionnel' },
-
-  'mode-beaute': { label: 'Mode & Beauté', desc: 'Vêtements, chaussures, sacs, montres, bijoux et cosmétiques' },
-  vetements: { label: 'Vêtements', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  chaussures: { label: 'Chaussures', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'sacs-maroquinerie': { label: 'Sacs et maroquinerie', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'montres-bijoux': { label: 'Montres et bijoux', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'cosmetiques-parfums': { label: 'Cosmétiques et parfums', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'tenues-traditionnelles': { label: 'Tenues traditionnelles', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'cheveux-perruques': { label: 'Cheveux et perruques', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-  'accessoires-mode': { label: 'Accessoires de mode', parent: 'mode-beaute', parentLabel: 'Mode & Beauté' },
-
-  'maison-meubles': { label: 'Maison & Meubles', desc: 'Mobilier, électroménager, décoration, literie et jardin' },
-  'salons-canapes': { label: 'Salons et canapés', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'chambres-literie': { label: 'Chambres et literie', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'tables-chaises': { label: 'Tables et chaises', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'rangement-armoires': { label: 'Rangement et armoires', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  electromenager: { label: 'Électroménager', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'arts-table-cuisine': { label: 'Arts de la table & cuisine', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'decoration-linge': { label: 'Décoration et linge', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-  'jardin-exterieur': { label: 'Jardin et extérieur', parent: 'maison-meubles', parentLabel: 'Maison & Meubles' },
-
-  electronique: { label: 'Électronique', desc: 'Téléphones, ordinateurs, tablettes, TV, audio et accessoires high-tech' },
-  telephones: { label: 'Téléphones et smartphones', parent: 'electronique', parentLabel: 'Électronique' },
-  'ordinateurs-tablettes': { label: 'Ordinateurs et tablettes', parent: 'electronique', parentLabel: 'Électronique' },
-  'tv-home-cinema': { label: 'TV et Home Cinéma', parent: 'electronique', parentLabel: 'Électronique' },
-  'audio-casques-enceintes': { label: 'Audio, casques et enceintes', parent: 'electronique', parentLabel: 'Électronique' },
-  'photo-cameras': { label: 'Photo et caméras', parent: 'electronique', parentLabel: 'Électronique' },
-  'consoles-jeux-video': { label: 'Consoles et jeux vidéo', parent: 'electronique', parentLabel: 'Électronique' },
-  'objets-connectes': { label: 'Montres et objets connectés', parent: 'electronique', parentLabel: 'Électronique' },
-  'accessoires-composants': { label: 'Accessoires et composants', parent: 'electronique', parentLabel: 'Électronique' },
-
-  'loisirs-sport': { label: 'Loisirs & Sport', desc: 'Sport, fitness, vélos, instruments de musique, livres et jouets' },
-  'sport-fitness': { label: 'Sport et fitness', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'velos-trottinettes': { label: 'Vélos et trottinettes', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'instruments-musique': { label: 'Instruments de musique', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'livres-papeterie': { label: 'Livres et papeterie', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'jeux-jouets': { label: 'Jeux et jouets', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'camping-plein-air': { label: 'Camping et plein air', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'art-collection': { label: 'Art et collection', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-  'billetterie-evenements': { label: 'Billetterie et événements', parent: 'loisirs-sport', parentLabel: 'Loisirs & Sport' },
-
-  autres: { label: 'Autres & Services', desc: 'Services, cours, événements, puériculture, agriculture et divers' },
-  'puericulture-bebe': { label: 'Puériculture et bébé', parent: 'autres', parentLabel: 'Autres & Services' },
-  'cours-formations': { label: 'Cours et formations', parent: 'autres', parentLabel: 'Autres & Services' },
-  'prestations-services': { label: 'Prestations de services', parent: 'autres', parentLabel: 'Autres & Services' },
-  'evenementiel-traiteur': { label: 'Événementiel et traiteur', parent: 'autres', parentLabel: 'Autres & Services' },
-  'produits-agricoles-elevage': { label: 'Produits agricoles & élevage', parent: 'autres', parentLabel: 'Autres & Services' },
-  'animaux-accessoires': { label: 'Animaux et accessoires', parent: 'autres', parentLabel: 'Autres & Services' },
-  'objets-perdus-trouves': { label: 'Objets perdus / trouvés', parent: 'autres', parentLabel: 'Autres & Services' },
-  'divers-non-classe': { label: 'Divers non classé', parent: 'autres', parentLabel: 'Autres & Services' },
+const CATEGORY_SLUG_ALIASES = {
+  real_estate: 'immobilier',
+  vehicle: 'vehicules',
+  vehicule: 'vehicules',
+  other: 'autres',
+  autre: 'autres',
+  divers: 'autres',
 };
 
 let cachedTemplateHtml = null;
@@ -93,12 +24,6 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function formatPriceFCFA(price) {
-  const num = Number(price);
-  if (!Number.isFinite(num) || num <= 0) return 'Prix sur demande';
-  return `${Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} FCFA`;
 }
 
 async function getIndexHtmlTemplate(req) {
@@ -129,9 +54,11 @@ async function getIndexHtmlTemplate(req) {
 async function fetchListingFromSupabase(id) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !supabaseKey) return null;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase public credentials are not configured for SEO rendering.');
+  }
 
-  const endpoint = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/listings?id=eq.${encodeURIComponent(id)}&select=id,title,description,price,location,status,attributes,created_at,updated_at,listing_images(image_url,is_cover,display_order)&limit=1`;
+  const endpoint = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/listings?id=eq.${encodeURIComponent(id)}&select=id,title,description,price,location,status,attributes,transaction_type,created_at,updated_at,listing_images(image_url,is_cover,display_order)&limit=1`;
   const res = await fetch(endpoint, {
     headers: {
       apikey: supabaseKey,
@@ -140,9 +67,14 @@ async function fetchListingFromSupabase(id) {
     signal: AbortSignal.timeout(2200),
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    throw new Error(`Supabase listing lookup failed with HTTP ${res.status}.`);
+  }
   const rows = await res.json();
-  return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+  if (!Array.isArray(rows)) {
+    throw new Error('Supabase listing lookup returned an invalid response.');
+  }
+  return rows.length > 0 ? rows[0] : null;
 }
 
 function injectSeoIntoHtml(html, seo) {
@@ -208,6 +140,27 @@ function injectSeoIntoHtml(html, seo) {
   return updated;
 }
 
+function sendNotFound(res, html, title, description, canonicalUrl) {
+  const notFoundHtml = injectSeoIntoHtml(html, {
+    title,
+    description,
+    canonicalUrl,
+    noIndex: true,
+  });
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60');
+  return res.status(404).send(notFoundHtml);
+}
+
+function sendUnavailable(res) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('Retry-After', '60');
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(503).send('Service temporairement indisponible.');
+}
+
 export default async function handler(req, res) {
   try {
     const htmlTemplate = await getIndexHtmlTemplate(req);
@@ -218,25 +171,33 @@ export default async function handler(req, res) {
     if (route === 'listing') {
       const id = (urlObj.searchParams.get('id') || '').trim();
       const canonicalUrl = `${SITE_ORIGIN}/listings/${encodeURIComponent(id)}`;
-      const row = id ? await fetchListingFromSupabase(id).catch(() => null) : null;
-
-      if (!row || row.status === 'archived' || row.status === 'draft') {
-        const notFoundHtml = injectSeoIntoHtml(htmlTemplate, {
-          title: 'Annonce introuvable ou expirée | Kawral Sénégal',
-          description: "Cette annonce n'est plus disponible sur Kawral. Découvrez des centaines d'autres annonces vérifiées au Sénégal.",
-          canonicalUrl,
-          noIndex: true,
-        });
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60');
-        return res.status(200).send(notFoundHtml);
+      if (!id) {
+        return sendNotFound(
+          res,
+          htmlTemplate,
+          'Annonce introuvable | Kawral',
+          'Cette annonce n’existe pas ou n’est plus disponible.',
+          `${SITE_ORIGIN}/listings/`
+        );
       }
 
-      const city = ((row.location || 'Dakar').split(',')[0] || 'Dakar').trim();
-      const priceLabel = formatPriceFCFA(row.price);
+      const row = await fetchListingFromSupabase(id);
+
+      if (!row || row.status !== 'published') {
+        return sendNotFound(
+          res,
+          htmlTemplate,
+          'Annonce introuvable ou indisponible | Kawral',
+          'Cette annonce n’existe pas ou n’est plus disponible sur Kawral.',
+          canonicalUrl
+        );
+      }
+
       const attrs = row.attributes || {};
-      const catSlug = attrs.category || 'immobilier';
-      const catInfo = CATEGORY_CATALOG[catSlug] || { label: attrs.categoryLabel || 'Annonces' };
+      const rawCategorySlug = String(attrs.category || '').trim();
+      const catSlug = CATEGORY_SLUG_ALIASES[rawCategorySlug] || rawCategorySlug;
+      const catInfo = SEO_CATEGORY_METADATA[catSlug];
+      const categoryLabel = attrs.categoryLabel || catInfo?.label || '';
       const sortedImages = Array.isArray(row.listing_images)
         ? [...row.listing_images]
             .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
@@ -244,15 +205,17 @@ export default async function handler(req, res) {
             .filter(Boolean)
         : [];
       const primaryImage = sortedImages[0] || DEFAULT_IMAGE;
-      const cleanDesc = String(row.description || '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 155);
-
-      const seoTitle = `${row.title} — ${priceLabel} à ${city} | Kawral`;
-      const seoDescription =
-        cleanDesc ||
-        `${row.title} à ${city} (${priceLabel}). Contactez directement le vendeur sur Kawral Sénégal.`;
+      const transactionType = row.transaction_type || attrs.transactionType;
+      const seo = getListingSeoMetadata({
+        title: row.title,
+        categoryLabel,
+        location: row.location,
+        transactionType,
+        description: row.description,
+      });
+      const seoTitle = seo.title || 'Annonce au Sénégal | Kawral';
+      const seoDescription = seo.description || seoTitle;
+      const price = Number(row.price);
 
       const jsonLd = {
         '@context': 'https://schema.org',
@@ -261,40 +224,46 @@ export default async function handler(req, res) {
             '@type': 'BreadcrumbList',
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE_ORIGIN}/` },
+              ...(catInfo
+                ? [{
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: catInfo.label,
+                    item: `${SITE_ORIGIN}/categories/${catSlug}`,
+                  }]
+                : []),
               {
                 '@type': 'ListItem',
-                position: 2,
-                name: catInfo.label,
-                item: `${SITE_ORIGIN}/categories/${catSlug}`,
+                position: catInfo ? 3 : 2,
+                name: row.title,
+                item: canonicalUrl,
               },
-              { '@type': 'ListItem', position: 3, name: row.title, item: canonicalUrl },
             ],
           },
           {
             '@type': 'Product',
             name: row.title,
             description: row.description || seoDescription,
-            image: sortedImages.length > 0 ? sortedImages : [DEFAULT_IMAGE],
+            ...(sortedImages.length > 0 ? { image: sortedImages } : {}),
             sku: row.id,
-            category: catInfo.label,
+            ...(categoryLabel ? { category: categoryLabel } : {}),
             offers: {
               '@type': 'Offer',
               url: canonicalUrl,
               priceCurrency: 'XOF',
-              price: Number(row.price) || 0,
-              availability:
-                row.status === 'published'
-                  ? 'https://schema.org/InStock'
-                  : 'https://schema.org/SoldOut',
-              availableAtOrFrom: {
+              ...(Number.isFinite(price) && price > 0 ? { price } : {}),
+              availability: 'https://schema.org/InStock',
+              ...(row.location
+                ? { availableAtOrFrom: {
                 '@type': 'Place',
-                name: row.location || city,
+                name: row.location,
                 address: {
                   '@type': 'PostalAddress',
-                  addressLocality: city,
+                  ...(seo.city ? { addressLocality: seo.city } : {}),
                   addressCountry: 'SN',
                 },
-              },
+              } }
+                : {}),
             },
           },
         ],
@@ -310,22 +279,24 @@ export default async function handler(req, res) {
       });
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
       return res.status(200).send(rendered);
     }
 
     // 2. Route /categories/:slug
     if (route === 'category') {
       const slug = (urlObj.searchParams.get('slug') || '').trim();
-      const catInfo = CATEGORY_CATALOG[slug];
-      const catLabel = catInfo ? catInfo.label : slug;
-      const parentPrefix = catInfo && catInfo.parentLabel ? `${catInfo.parentLabel} ` : '';
       const canonicalUrl = `${SITE_ORIGIN}/categories/${encodeURIComponent(slug)}`;
-      const seoTitle = `${catLabel} au Sénégal — Petites annonces ${parentPrefix}| Kawral`;
-      const seoDescription =
-        catInfo && catInfo.desc
-          ? `${catInfo.desc} au Sénégal. Achetez, louez et vendez en direct à Dakar et dans les régions sans intermédiaire sur Kawral.`
-          : `Découvrez toutes les annonces de ${catLabel.toLowerCase()} à vendre ou à louer au Sénégal (Dakar, Thiès, Mbour, Saint-Louis). Contact direct sur Kawral.`;
+      const catInfo = SEO_CATEGORY_METADATA[slug];
+      if (!catInfo) {
+        return sendNotFound(
+          res,
+          htmlTemplate,
+          'Catégorie introuvable | Kawral',
+          'Cette catégorie n’existe pas sur Kawral.',
+          canonicalUrl
+        );
+      }
 
       const breadcrumbItems = [
         { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE_ORIGIN}/` },
@@ -340,21 +311,21 @@ export default async function handler(req, res) {
         breadcrumbItems.push({
           '@type': 'ListItem',
           position: 3,
-          name: catLabel,
+          name: catInfo.label,
           item: canonicalUrl,
         });
       } else {
         breadcrumbItems.push({
           '@type': 'ListItem',
           position: 2,
-          name: catLabel,
+          name: catInfo.label,
           item: canonicalUrl,
         });
       }
 
       const rendered = injectSeoIntoHtml(htmlTemplate, {
-        title: seoTitle,
-        description: seoDescription,
+        title: catInfo.title,
+        description: catInfo.description,
         canonicalUrl,
         jsonLd: {
           '@context': 'https://schema.org',
@@ -387,8 +358,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.status(200).send(htmlTemplate);
   } catch (err) {
-    console.error('[api/seo] Fallback to static index.html:', err);
-    res.writeHead(307, { Location: '/index.html' });
-    return res.end();
+    console.error('[api/seo] Failed to generate SEO response:', err);
+    return sendUnavailable(res);
   }
 }

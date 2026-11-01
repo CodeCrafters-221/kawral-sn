@@ -57,36 +57,6 @@ export const HomePage: React.FC = () => {
         title="Kawral | Achetez. Louez. Vendez. — Marketplace Sénégal"
         description="Le point de rencontre de l'offre et de la demande au Sénégal : petites annonces directes (immobilier, véhicules, multimédia, mode, matériel pro). Achetez, louez et vendez sans intermédiaire."
         canonicalPath="/"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Comment publier une annonce sur Kawral au Sénégal ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Créez gratuitement votre compte vendeur sur Kawral, ajoutez les photos, le prix en FCFA et la localisation de votre bien (Dakar, Thiès, Mbour, Saly, Saint-Louis...), puis publiez votre annonce en moins de 2 minutes."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Comment contacter un propriétaire ou vendeur sur Kawral ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Sur chaque annonce, vous pouvez contacter directement le vendeur par téléphone, par WhatsApp, via la messagerie interne sécurisée ou réserver un créneau de visite en ligne sans frais d'intermédiaire."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Quelles catégories d'annonces sont disponibles sur Kawral Sénégal ?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Kawral regroupe 8 grandes catégories au Sénégal : Immobilier (appartements, villas, studios, terrains, bureaux), Véhicules (voitures, motos, utilitaires, pièces), Électronique & Multimédia, Mode & Beauté, Maison & Meubles, Matériel Professionnel, Loisirs & Sport, et Services."
-              }
-            }
-          ]
-        }}
       />
 
       {/* ── HERO SECTION : CARROUSEL 8 CATÉGORIES AVEC OVERLAY SOMBRE & CONTROLES ── */}
@@ -289,16 +259,6 @@ export const HomePage: React.FC = () => {
         onClose={() => setBecomeSellerModalOpen(false)}
       />
 
-      {/* Contenu éditorial sémantique longue traîne pour l'indexation des recherches locales au Sénégal */}
-      <section aria-label="Présentation de la marketplace Kawral au Sénégal" className="sr-only">
-        <h2>Kawral — Le site de petites annonces directes au Sénégal (Dakar et régions)</h2>
-        <p>
-          Bienvenue sur Kawral (kawral.sn), la plateforme sénégalaise dédiée à l'achat, la location et la vente en direct entre particuliers et professionnels. Trouvez des annonces vérifiées d'immobilier à Dakar (Almadies, Plateau, Mermoz, Sacré-Cœur, Ngor, Ouakam, Yoff, Parcelles Assainies, Pikine, Guédiawaye, Rufisque, Diamniadio), sur la Petite Côte (Mbour, Saly Portudal, Somone), à Thiès, Saint-Louis, Touba, Kaolack et Ziguinchor.
-        </p>
-        <p>
-          Comparez les prix en Franc CFA (FCFA) pour votre futur appartement, maison, villa, studio meublé, terrain titre foncier, voiture d'occasion, moto, téléphone iPhone ou Samsung, ordinateur portable, mobilier ou équipement professionnel, et prenez rendez-vous directement avec le vendeur sans commission.
-        </p>
-      </section>
     </div>
   );
 };
