@@ -209,7 +209,7 @@ export const Navbar: React.FC = () => {
          - Après le Hero, hors accueil ou menu mobile ouvert : fond blanc pur net
          ══════════════════════════════════════════════════════════════════════ */}
       <header
-        className={`fixed top-0 left-0 right-0 w-full transition-colors duration-200 ease-in-out ${
+        className={`ios-standalone-header fixed top-0 left-0 right-0 w-full transition-colors duration-200 ease-in-out ${
           mobileMenuOpen ? "z-[60]" : "z-50"
         } ${
           headerIsDark
