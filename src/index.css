@@ -216,29 +216,25 @@ a,
 /* iOS standalone overlays the status bar because the document uses
    viewport-fit=cover + black-translucent. Keep the fixed header background
    behind the status bar while moving its controls into the safe area. */
-@supports (-webkit-touch-callout: none) {
-  @media (display-mode: standalone) {
-    .ios-standalone-header {
-      padding-top: env(safe-area-inset-top, 0px);
-    }
+.ios-standalone .ios-standalone-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
 
-    .ios-standalone-content-offset {
-      padding-top: calc(164px + env(safe-area-inset-top, 0px));
-    }
+.ios-standalone .ios-standalone-content-offset {
+  padding-top: calc(164px + env(safe-area-inset-top, 0px));
+}
 
-    .ios-standalone-mobile-menu {
-      top: calc(4rem + env(safe-area-inset-top, 0px));
-    }
+.ios-standalone .ios-standalone-mobile-menu {
+  top: calc(4rem + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 640px) {
+  .ios-standalone .ios-standalone-content-offset {
+    padding-top: calc(120px + env(safe-area-inset-top, 0px));
   }
 
-  @media (display-mode: standalone) and (min-width: 640px) {
-    .ios-standalone-content-offset {
-      padding-top: calc(120px + env(safe-area-inset-top, 0px));
-    }
-
-    .ios-standalone-mobile-menu {
-      top: calc(4.5rem + env(safe-area-inset-top, 0px));
-    }
+  .ios-standalone .ios-standalone-mobile-menu {
+    top: calc(4.5rem + env(safe-area-inset-top, 0px));
   }
 }
 
