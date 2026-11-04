@@ -58,7 +58,7 @@ export const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Menu principal"
-      className="lg:hidden fixed top-16 sm:top-18 inset-x-0 bottom-0 z-[55] bg-white text-kawral-dark flex flex-col justify-between overflow-y-auto overscroll-contain animate-fade-in"
+      className="ios-standalone-mobile-menu lg:hidden fixed top-16 sm:top-18 inset-x-0 bottom-0 z-[55] bg-white text-kawral-dark flex flex-col justify-between overflow-y-auto overscroll-contain animate-fade-in"
     >
       <div className="px-5 py-5 space-y-6">
         {/* ── 1. Espace Visiteur (Authentification) ou Résumé discret de l'utilisateur ── */}

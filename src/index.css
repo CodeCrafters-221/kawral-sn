@@ -212,6 +212,36 @@ a,
 .pt-safe {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* iOS standalone overlays the status bar because the document uses
+   viewport-fit=cover + black-translucent. Keep the fixed header background
+   behind the status bar while moving its controls into the safe area.
+   env(safe-area-inset-top) is 0px wherever there is no inset (desktop, Android,
+   Safari with its toolbar), so these rules are safe to apply unconditionally and
+   no longer depend on the JS-detected .ios-standalone class. */
+.ios-standalone-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Offset for pages whose content starts below the fixed header (mobile: header + search + categories) */
+.ios-standalone-header-offset {
+  padding-top: calc(164px + env(safe-area-inset-top, 0px));
+}
+
+.ios-standalone-mobile-menu {
+  top: calc(4rem + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 640px) {
+  .ios-standalone-header-offset {
+    padding-top: calc(120px + env(safe-area-inset-top, 0px));
+  }
+
+  .ios-standalone-mobile-menu {
+    top: calc(4.5rem + env(safe-area-inset-top, 0px));
+  }
+}
+
 .pt-navbar-safe {
   padding-top: calc(7rem + env(safe-area-inset-top, 0px));
 }

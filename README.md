@@ -3,538 +3,171 @@
 # 🏠 Kawral
 ### **Achetez. Louez. Vendez.**
 
-*Plateforme moderne de petites annonces, immobilier et véhicules au Sénégal 🇸🇳*
-
-<br/>
+*Achetez, vendez et louez au Sénégal : immobilier, véhicules, mode, maison, électronique, loisirs et plus encore 🇸🇳*
 
 ![Kawral — Dakar Marketplace Platform](./public/images/hero-banner.jpg)
 
-<br/>
-
-[![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Express](https://img.shields.io/badge/Express.js-4.21-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![Zod](https://img.shields.io/badge/Zod-3.23-3B82F6?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
-[![Gemini](https://img.shields.io/badge/Google_Gemini-AI-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
-
-<br/>
-
-**🟢 En développement actif** · **v0.2.0** · **Août 2026**
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
 </div>
 
 ---
 
-## 📋 Table des matières
+## Aperçu
 
-- [Aperçu](#-aperçu)
-- [Fonctionnalités par rôle](#-fonctionnalités-par-rôle)
-- [Architecture](#-architecture)
-- [Stack Technologique](#-stack-technologique)
-- [Structure du Projet](#-structure-du-projet)
-- [Base de données](#-base-de-données)
-- [IA et Automatisation](#-ia--automatisation)
-- [Système de Design](#-système-de-design)
-- [Sécurité et Auth](#-sécurité--authentification)
-- [Démarrage Rapide](#-démarrage-rapide)
-- [Roadmap](#-roadmap)
-- [Contribution](#-contribution)
+Kawral est une plateforme mobile-first de vente et de location au Sénégal, couvrant de nombreuses catégories : immobilier, véhicules, matériel professionnel, mode, maison et jardin, électronique, loisirs et bien d'autres. Les visiteurs peuvent parcourir et filtrer les offres, tandis que les membres peuvent enregistrer des favoris, échanger avec les vendeurs et demander des rendez-vous. Les vendeurs disposent d'un espace pour publier et gérer leurs offres.
 
----
+### Fonctionnalités
 
-## ✨ Aperçu
+- Recherche et filtres par catégorie, prix et localisation
+- Fiches d'annonces avec galerie d'images et détails adaptés à la catégorie
+- Comptes client, vendeur et administrateur
+- Publication et gestion d'annonces par étapes
+- Favoris, messagerie liée aux annonces et rendez-vous
+- Tableau de bord d'administration et outils de modération
+- Pages légales, métadonnées SEO, sitemap et expérience PWA
 
-**Kawral** *(« Union » en Pulaar)* est une marketplace full-stack sénégalaise nouvelle génération : immobilier haut de gamme, véhicules, petites annonces et agences professionnelles — le tout dans une expérience **Mobile-First**, temps réel, propulsée par l'IA Google Gemini.
+> Les anciennes routes d'agence restent prises en charge par redirection. Le rôle agence n'est plus proposé comme rôle distinct dans le flux actuel.
 
-### Points clés
+## Stack et architecture
 
-| Pilier | Description |
-|:---:|:---|
-| 🎭 **Multi-rôles** | 4 espaces distincts : Client, Vendeur, Agence, Admin |
-| 💬 **Messagerie contextuelle** | Chat temps réel lié à l'annonce avec chips rapides |
-| 📅 **Rendez-vous intégrés** | Planification et suivi des visites en direct |
-| 🤖 **IA Kawral** | Copilote Gemini pour génération, modération, analyse |
-| 🎬 **Listing immersif** | Hero sticky, auto-slide tactile, barre de progression |
-| 🛡️ **Sécurité robuste** | Supabase Auth + RLS + validation Zod stricte |
+| Partie | Technologies |
+|:---|:---|
+| Interface | React 19, TypeScript 5.8, Vite 6, Tailwind CSS 4, React Router 7 |
+| Composants | Radix UI, Lucide React, Motion, Sonner |
+| Validation | Zod |
+| Données et authentification | Supabase Auth, PostgreSQL, Storage, Realtime et RLS |
+| Serveur Node | Express 4, TSX |
+| SEO sur Vercel | Fonction `api/seo.js`, rendu de métadonnées pour les annonces et catégories |
 
----
-
-## 🌟 Fonctionnalités par rôle
-
-<br/>
-
-![Kawral Marketplace — Aperçu des fonctionnalités](./public/images/marketplace-preview.jpg)
-
-<br/>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 👤 Client
-- Recherche multicritères (prix FCFA, localisation, surface, pièces)
-- Favoris avec liste personnalisée ❤️
-- Contact direct vendeur ou agence sans quitter la fiche
-- Demande de rendez-vous en 1 clic
-- Dashboard de suivi (messages, visites, favoris)
-
-</td>
-<td width="50%" valign="top">
-
-### 🏪 Vendeur
-- Création guidée d'annonces avec upload multi-images
-- Dashboard analytique (vues, contacts, conversions)
-- Centre de messagerie et gestion des rendez-vous
-- Badge de confiance et indicateur de présence
-- Score vendeur public visible sur la fiche
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### 🏢 Agence
-- Profil certifié (bannière, logo, biographie officielle)
-- Vitrine publique dédiée `/agencies/:id`
-- Portefeuille multi-biens géré par lots
-- Page publique en lecture seule *(équipe à venir)*
-
-</td>
-<td width="50%" valign="top">
-
-### 🛡️ Admin
-- Cockpit global : métriques, annonces, inscrits
-- Assistant IA administratif Kawral (Gemini)
-- Modération de contenu et validation des annonces
-- Gestion des rôles et certification des agences
-
-</td>
-</tr>
-</table>
-
----
-
-## 🏗️ Architecture
-
-### Schéma global du système
-
-```mermaid
-graph TB
-    subgraph FE["Frontend — React 19 + TypeScript + Vite"]
-        Pages["Pages et Composants"]
-        Router["React Router 7"]
-        Ctx["Context API — Auth et App"]
-        Zod["Validation Zod"]
-        Svc["Services Supabase"]
-        Pages --> Router
-        Router --> Ctx
-        Pages --> Zod
-        Zod --> Svc
-    end
-
-    subgraph API["Backend — Node.js + Express"]
-        Srv["server.ts — API REST"]
-        AI["Google GenAI — Gemini"]
-        Srv --> AI
-    end
-
-    subgraph DB["Supabase Cloud"]
-        PG[("PostgreSQL")]
-        Auth["Supabase Auth"]
-        Storage["Supabase Storage"]
-        RLS["Row Level Security"]
-        RT["Realtime Engine"]
-        PG --- RLS
-        PG --- RT
-    end
-
-    Svc --> Auth
-    Svc --> PG
-    Svc --> Storage
-    Svc --> RT
-    Pages --> Srv
-
-    style FE fill:#0B4D45,color:#fff,stroke:#083A34,stroke-width:2px
-    style API fill:#F47B20,color:#fff,stroke:#D4691A,stroke-width:2px
-    style DB fill:#3FCF8E,color:#1a1a1a,stroke:#2BA86A,stroke-width:2px
-```
-
-### Flux de navigation utilisateur
+Le navigateur utilise les services Supabase pour les fonctionnalités marketplace. `server.ts` lance Express et Vite en développement et expose aussi des endpoints de santé, de validation d'adresse email et d'analytics. Le déploiement Vercel configure séparément le routage SEO dans `api/seo.js`.
 
 ```mermaid
 flowchart LR
-    V(["Visiteur"]) --> H["Accueil"]
-    H --> S["Recherche"]
-    H --> AG["Agences"]
-    S --> D["Fiche Annonce"]
-    AG --> ADP["Vitrine Agence"]
-
-    D --> CHK{"Connecte ?"}
-    CHK -- Non --> Auth["Connexion"]
-    CHK -- Oui --> Act["Message / RDV"]
-
-    Auth --> R{"Role"}
-    R -- Client --> DC["Dashboard Client"]
-    R -- Vendeur --> DV["Dashboard Vendeur"]
-    R -- Agence --> DA["Dashboard Agence"]
-    R -- Admin --> DD["Dashboard Admin"]
-
-    style H fill:#0B4D45,color:#fff
-    style D fill:#F47B20,color:#fff
-    style DD fill:#18211F,color:#fff
-    style Auth fill:#3FCF8E,color:#1a1a1a
+    Browser["React + Vite"] -->|"Auth, données, fichiers, temps réel"| Supabase["Supabase\nPostgreSQL · Auth · Storage · RLS"]
+    Browser -->|"API en mode serveur Node"| Express["Express — server.ts"]
+    Vercel["Vercel"] --> Seo["api/seo.js\nMétadonnées et HTML SEO"]
 ```
 
----
+## Rôles et parcours
 
-## 💻 Stack Technologique
-
-<table>
-<tr>
-<td align="center" width="33%">
-
-### 🎨 Frontend
-| Outil | Version |
-|:---|:---:|
-| React | `19.0.1` |
-| TypeScript | `5.8` |
-| Vite | `6.2` |
-| Tailwind CSS | `4.1` |
-| Lucide React | `0.546` |
-| React Router | `7.18` |
-| Zod | `3.23.8` |
-
-</td>
-<td align="center" width="33%">
-
-### ⚙️ Backend et IA
-| Outil | Version |
-|:---|:---:|
-| Express.js | `4.21` |
-| Node.js | `18+` |
-| TSX | `4.21` |
-| @google/genai | `2.17` |
-| Dotenv | `17.2` |
-| ESBuild | `0.25` |
-
-</td>
-<td align="center" width="33%">
-
-### 🗄️ Données et Cloud
-| Outil | Type |
-|:---|:---:|
-| Supabase | BaaS Cloud |
-| PostgreSQL | SQL |
-| Supabase Auth | JWT |
-| Supabase Storage | CDN |
-| RLS Policies | Sécurité |
-| Realtime | WebSocket |
-
-</td>
-</tr>
-</table>
-
----
-
-## 📁 Structure du Projet
-
-```
-kawral/
-│
-├── index.html                       # Template SPA
-├── server.ts                        # API Express + proxy Gemini
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-│
-├── src/
-│   ├── main.tsx                     # Entrée React + BrowserRouter
-│   ├── App.tsx                      # Shell global (Navbar, Footer, Modals)
-│   ├── index.css                    # Tokens Tailwind kawral-* + animations
-│   │
-│   ├── routes/
-│   │   └── index.tsx                # Routes centralisées + ProtectedRoute
-│   │
-│   ├── features/                    # Modules par domaine métier
-│   │   ├── marketplace/pages/       # HomePage, SearchPage, ListingDetailPage, AgenciesPage
-│   │   ├── seller/pages/            # SellerDashboard, CreateListingPage
-│   │   ├── agency/pages/            # AgencyDashboard, AgencyDetailPage
-│   │   ├── client/pages/            # ClientDashboard, Favoris, Messagerie, RDV
-│   │   ├── admin/pages/             # AdminDashboard + IA Kawral
-│   │   └── shared/pages/            # NotFoundPage, ResetPasswordPage
-│   │
-│   ├── components/
-│   │   ├── auth/                    # AuthModal avec validation Zod par champ
-│   │   ├── layout/                  # Navbar, MobileNavigation, Footer
-│   │   ├── marketplace/             # ListingCard, AgencyCard, FilterSidebar
-│   │   ├── modals/                  # AppointmentModal, ProfileSettingsModal
-│   │   └── ui/                      # PasswordInput, Avatar, Toast, Badges
-│   │
-│   ├── context/
-│   │   ├── AppContext.tsx           # Filtres, toasts, annonces, navigation
-│   │   └── AuthContext.tsx          # Session Supabase, roles, profil actif
-│   │
-│   ├── services/supabase/
-│   │   ├── listingsService.ts       # CRUD Annonces
-│   │   ├── profileService.ts        # Profils et roles
-│   │   ├── messagesService.ts       # Conversations et messages
-│   │   ├── appointmentsService.ts   # Rendez-vous
-│   │   ├── agenciesService.ts       # Agences
-│   │   └── storageService.ts        # Upload images et avatars
-│   │
-│   ├── lib/
-│   │   ├── supabase.ts              # Client Supabase configuré
-│   │   └── validation.ts            # Schemas Zod centralisés
-│   │
-│   ├── types/index.ts               # Types TypeScript globaux
-│   └── utils/                       # formatters FCFA, dates, UUID
-│
-├── scripts/
-│   ├── generate-seed.ts             # Données de test réalistes
-│   └── sync-supabase.ts             # Synchronisation schema SQL
-│
-└── public/images/                   # Illustrations officielles
-```
-
-### Table des routes
-
-| Route | Composant | Accès |
-|:---|:---|:---:|
-| `/` | `HomePage` | Public |
-| `/explorer` | `SearchPage` | Public |
-| `/listings/:id` | `ListingDetailPage` | Public |
-| `/agencies` | `AgenciesPage` | Public |
-| `/agencies/:id` | `AgencyDetailPage` | Public |
-| `/auth/reset-password` | `ResetPasswordPage` | Public |
-| `/dashboard/client/*` | `ClientDashboard` | 🔒 |
-| `/dashboard/seller/*` | `SellerDashboard` | 🔒 |
-| `/dashboard/agency/*` | `AgencyDashboard` | 🔒 |
-| `/admin/*` | `AdminDashboard` | 🔒 Admin |
-
----
-
-## 🗄️ Base de Données
-
-### Schéma Entité-Association
-
-```mermaid
-erDiagram
-    PROFILES ||--o{ LISTINGS : "publie"
-    PROFILES ||--o{ AGENCIES : "possede"
-    PROFILES ||--o{ FAVORITES : "enregistre"
-    PROFILES ||--o{ CONVERSATIONS : "participe"
-    PROFILES ||--o{ MESSAGES : "envoie"
-    PROFILES ||--o{ APPOINTMENTS : "reserve"
-
-    LISTINGS ||--o{ LISTING_IMAGES : "comporte"
-    LISTINGS ||--o{ FAVORITES : "est favori"
-    LISTINGS ||--o{ CONVERSATIONS : "genere"
-    LISTINGS ||--o{ APPOINTMENTS : "est visite"
-    CATEGORIES ||--o{ LISTINGS : "classifie"
-
-    CONVERSATIONS ||--o{ MESSAGES : "contient"
-
-    PROFILES {
-        uuid id PK
-        varchar full_name
-        varchar phone
-        text avatar_url
-        varchar role
-        timestamp created_at
-    }
-
-    LISTINGS {
-        uuid id PK
-        uuid user_id FK
-        uuid category_id FK
-        varchar title
-        decimal price
-        varchar location
-        varchar status
-        int views_count
-    }
-
-    AGENCIES {
-        uuid id PK
-        uuid user_id FK
-        varchar agency_name
-        text logo_url
-        boolean verified
-    }
-```
-
-### Intégrité Référentielle
-
-| Table | Clé Étrangère | Parent | ON DELETE |
-|:---|:---|:---|:---:|
-| `agencies` | `user_id` | `profiles` | **CASCADE** |
-| `listings` | `user_id` | `profiles` | **CASCADE** |
-| `listing_images` | `listing_id` | `listings` | **CASCADE** |
-| `favorites` | `user_id`, `listing_id` | `profiles`, `listings` | **CASCADE** |
-| `conversations` | `buyer_id`, `seller_id` | `profiles` | **CASCADE** |
-| `conversations` | `listing_id` | `listings` | **SET NULL** |
-| `messages` | `conversation_id` | `conversations` | **CASCADE** |
-| `appointments` | `client_id` | `profiles` | **CASCADE** |
-| `appointments` | `listing_id` | `listings` | **SET NULL** |
-
-> Supprimer un profil supprime en cascade toutes ses données (annonces, messages, agence…)
-
----
-
-## 🤖 IA & Automatisation
-
-<br/>
-
-![Kawral — Assistant IA propulsé par Google Gemini](./public/images/ai-assistant.jpg)
-
-<br/>
-
-Kawral intègre l'API **Google GenAI (Gemini)** via un serveur Express proxy :
-
-| Capacité | Description |
+| Rôle | Fonctions principales |
 |:---|:---|
-| ✍️ **Génération d'annonces** | Transformation de caractéristiques en descriptions professionnelles |
-| 🛡️ **Modération automatisée** | Analyse sémantique pour bloquer fraudes et contenus abusifs |
-| ⚡ **Assistant Admin** | Commandes en langage naturel pour auditer et automatiser des tâches |
-| 💬 **Assistant Utilisateur** | Aide contextuelle à la recherche pour tous les utilisateurs connectés |
+| **Visiteur** | Accueil, recherche, catégories et fiches d'annonces |
+| **Client** | Favoris, messagerie, demandes de rendez-vous et espace personnel |
+| **Vendeur** | Création et gestion des annonces, messagerie et rendez-vous |
+| **Admin** | Tableau de bord, gestion des annonces et modération |
 
----
+Les rôles applicatifs sont `client`, `seller` et `admin`. La base de données utilise notamment `vendeur` pour les profils vendeurs. Les anciennes URL `/agencies`, `/auth/register/agency` et `/dashboard/agency` redirigent vers les parcours actuels.
 
-## 🎨 Système de Design
+## Routes principales
 
-L'identité visuelle de Kawral célèbre l'élégance africaine contemporaine :
+| Route | Accès | Description |
+|:---|:---:|:---|
+| `/` | Public | Accueil |
+| `/explorer` | Public | Recherche et filtres |
+| `/explorer/:slug` | Public | Recherche par catégorie |
+| `/listings/:id` | Public | Détail d'une annonce |
+| `/annonces/:id`, `/annonce/:id` | Public | Alias historiques des fiches |
+| `/auth/login`, `/auth/register` | Public | Connexion et inscription |
+| `/auth/reset-password` | Public | Réinitialisation du mot de passe |
+| `/dashboard/client/*` | Connecté | Espace client |
+| `/dashboard/seller/*` | Vendeur | Espace vendeur |
+| `/admin/*` | Admin | Administration |
 
-| Token | Nom | Hex | Usage |
-|:---|:---|:---:|:---|
-| `kawral-green` | Émeraude Foncé | `#0B4D45` | Boutons primaires, headers, branding |
-| `kawral-orange` | Ambre Vif | `#F47B20` | CTA, accents, badges promotionnels |
-| `kawral-ivory` | Ivoire Épuré | `#FAF7F0` | Arrière-plans, surfaces calmes |
-| `kawral-dark` | Noir Profond | `#18211F` | Typographie principale |
-| `kawral-muted` | Gris Minéral | `#66726D` | Textes secondaires, métadonnées |
-| `kawral-border` | Bordure Douce | `#E5E0D8` | Cartes, séparateurs |
+## Structure du dépôt
 
-### Principes de design
-- 📱 **Mobile-First** — Navigation bas d'écran native sur mobile
-- 🔘 **Composants arrondis** — `rounded-2xl` / `rounded-3xl`
-- ✨ **Micro-animations** — Transitions fluides avec Framer Motion / CSS
-- 🖼️ **Cards modernes** — Ombres douces, bordures subtiles, galerie immersive
+```text
+src/
+├── components/                 # Interface partagée, navigation, modales et UI
+├── context/                    # États applicatifs et authentification
+├── data/                       # Catégories, caractéristiques et données locales
+├── features/
+│   ├── marketplace/            # Accueil, recherche et détails d'annonce
+│   ├── client/                 # Favoris et espace client
+│   ├── seller/                 # Tableau de bord et création d'annonce
+│   ├── admin/                  # Administration et modération
+│   └── shared/                 # Messagerie, rendez-vous et pages communes
+├── lib/                        # Supabase, validation et analytics
+├── services/supabase/          # Accès aux annonces, profils, messages, etc.
+├── routes/index.tsx            # Définition des routes et protections
+└── types/                      # Types partagés
 
----
-
-## 🔐 Sécurité & Authentification
-
-### Pipeline de sécurité
-
-```mermaid
-flowchart TD
-    A(["Utilisateur"]) --> B["Saisie du formulaire"]
-    B --> C{"Validation Zod"}
-    C -- Invalide --> D["Erreur sous le champ"]
-    C -- Valide --> E["Supabase Auth"]
-    E --> F["Token JWT"]
-    F --> G["AuthContext — Role actif"]
-    G --> H[("PostgreSQL + RLS")]
-
-    style C fill:#3B82F6,color:#fff
-    style E fill:#3FCF8E,color:#1a1a1a
-    style H fill:#0B4D45,color:#fff
+api/seo.js                      # Handler SEO pour Vercel
+server.ts                       # Serveur Express et Vite
+scripts/generate-sitemap.ts     # Génération du sitemap
+supabase/schema.sql             # Schéma de référence
+supabase/migrations/            # Migrations SQL ordonnées
+tests/                          # Tests SEO et scénarios k6
 ```
 
-| Fonctionnalité | Détail |
-|:---|:---|
-| 🔑 **Auth** | Email + mot de passe via Supabase Auth |
-| 🔒 **Sessions** | JWT avec refresh automatique |
-| 🛡️ **RLS** | Politiques Row Level Security par table |
-| 👥 **RBAC** | Dashboards et actions filtrés par rôle |
-| ✅ **Validation Zod** | Email, password min 8 chars + chiffre, téléphone sénégalais |
-| 🔄 **Reset password** | Lien email Supabase vers `ResetPasswordPage` sécurisée |
+## Données et sécurité
 
----
+Le schéma Supabase couvre les profils, catégories, annonces, images, favoris, conversations, messages, rendez-vous et disponibilités. Les scripts SQL de `supabase/migrations/` font évoluer le schéma au fil du projet.
 
-## 🚀 Démarrage Rapide
+L'authentification est gérée par Supabase Auth. Les politiques Row Level Security définissent l'accès aux données et les routes privées de l'interface sont protégées par rôle. Appliquez le schéma et les migrations à votre projet Supabase avant d'utiliser les fonctionnalités connectées. `supabase/schema.sql` est la référence du schéma ; les migrations documentent les changements incrémentaux.
+
+## Configuration locale
 
 ### Prérequis
-- **Node.js** v18+ ou **Bun**
-- Compte et projet **Supabase**
-- Clé **Google GenAI** ou **OpenRouter** *(optionnel pour l'IA)*
+
+- Node.js 18 ou plus récent
+- npm
+- Un projet Supabase pour l'authentification et les données
 
 ### Installation
 
 ```bash
-# 1 — Cloner et installer
 git clone https://github.com/Ibrahima96/kawral.git
 cd kawral
 npm install
-
-# 2 — Configuration
-cp .env.example .env
 ```
 
-### Variables d'environnement
+Créez un fichier `.env` à la racine (vous pouvez partir de `.env.example`) et définissez au minimum :
 
 ```env
 VITE_SUPABASE_URL=https://votre-projet.supabase.co
-VITE_SUPABASE_ANON_KEY=votre_cle_anon
-GEMINI_API_KEY=votre_cle_gemini
-OPENROUTER_API_KEY=votre_cle_openrouter
-OPENROUTER_VISION_MODEL=google/gemini-2.0-flash-exp:free
-APP_URL=http://localhost:3000
+VITE_SUPABASE_ANON_KEY=votre_cle_publique_supabase
 ```
 
-OpenRouter est utilisé en priorité pour analyser les images lors de la génération de descriptions et du remplissage automatique. Gemini Vision est utilisé automatiquement en secours.
+La clé Supabase utilisée côté navigateur doit être la clé publique anon/publishable. Ne placez jamais une clé `service_role` ou un secret privé dans une variable `VITE_*`.
 
-### Base de données
+Google Analytics est facultatif. Les variables `VITE_GA_MEASUREMENT_ID`, `GA_STREAM_ID`, `GA_STREAM_NAME` et `GA_STREAM_URL` configurent la mesure et les informations du flux. `GA_API_SECRET`, `GA_PROPERTY_ID`, `GA_CLIENT_EMAIL` et `GA_PRIVATE_KEY` servent aux fonctions serveur Analytics correspondantes. Consultez `.env.example` pour la liste des noms reconnus.
+
+### Lancer en développement
 
 ```bash
-npx tsx scripts/sync-supabase.ts   # Applique le schema SQL
-npx tsx scripts/generate-seed.ts   # Insere des donnees de test
+npm run dev
 ```
 
-### Lancer le projet
+L'application est servie par défaut sur [http://localhost:3000](http://localhost:3000).
 
-```bash
-npm run dev   # Disponible sur http://localhost:3000
-```
-
-### Scripts disponibles
+### Commandes disponibles
 
 | Commande | Description |
 |:---|:---|
-| `npm run dev` | Serveur de développement Hot-Reload |
-| `npm run build` | Build de production |
-| `npm run preview` | Prévisualisation du build |
-| `npm run lint` | Vérification TypeScript |
+| `npm run dev` | Lance le serveur Express et Vite en mode développement |
+| `npm run build` | Génère le sitemap puis compile l'application Vite |
+| `npm start` | Lance `dist/server.cjs` (ce fichier doit être fourni par le processus de déploiement) |
+| `npm run preview` | Prévisualise le build Vite |
+| `npm run lint` | Vérifie les types TypeScript (`tsc --noEmit`) |
+| `npm run test:seo` | Lance les tests SEO |
+| `npm run test:k6:smoke` | Lance le scénario k6 de fumée (k6 requis) |
+| `npm run test:k6:load` | Lance le scénario k6 de charge (k6 requis) |
+| `npm run test:k6:stress` | Lance le scénario k6 de stress (k6 requis) |
+| `npm run test:k6:spike` | Lance le scénario k6 de pic de trafic (k6 requis) |
 
----
+## Développement
 
-## 📍 Roadmap
+Les migrations et le schéma se trouvent dans `supabase/`. Examinez les scripts SQL et la cible Supabase avant de les appliquer. Le script `scripts/sync-supabase.ts` génère des données SQL depuis des données locales de démonstration ; il ne remplace pas l'application du schéma et des migrations.
 
-- [x] Authentification Supabase complète (email, reset, callback OAuth)
-- [x] Dashboards dédiés pour les 4 rôles
-- [x] Marketplace avec recherche, filtres avancés et tri
-- [x] Messagerie temps réel et gestion des rendez-vous
-- [x] Fiche annonce immersive (auto-slide, swipe tactile, hero sticky)
-- [x] Vitrine publique d'agence `/agencies/:id`
-- [x] Validation Zod sur tous les formulaires
-- [x] Assistant IA Kawral (Google Gemini via Express)
-- [x] Navigation Mobile-First (bottom navigation filtrée par rôle)
-- [ ] Notifications Push temps réel
-- [ ] Système de notes et avis vérifiés après visite
-- [ ] Paiements intégrés (Wave / Orange Money)
-- [ ] Application mobile native (React Native)
-- [ ] Déploiement production (Vercel + Railway)
+Le script `npm run build` génère le build frontend Vite, mais ne compile pas `server.ts` en `dist/server.cjs`. La commande `npm start` suppose donc que cet artefact serveur est préparé séparément.
 
----
-
-## 🤝 Contribution
-
-1. Créez une branche : `git checkout -b feature/ma-super-feature`
-2. Committez : `git commit -m 'feat: description claire'`
-3. Poussez : `git push origin feature/ma-super-feature`
-4. Ouvrez une **Pull Request** sur `develop`
+Pour contribuer, créez une branche dédiée, décrivez le changement dans un commit clair et ouvrez une pull request avec les étapes de vérification pertinentes.
 
 ---
 

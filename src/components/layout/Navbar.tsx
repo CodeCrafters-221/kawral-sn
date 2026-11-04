@@ -209,7 +209,7 @@ export const Navbar: React.FC = () => {
          - Après le Hero, hors accueil ou menu mobile ouvert : fond blanc pur net
          ══════════════════════════════════════════════════════════════════════ */}
       <header
-        className={`fixed top-0 left-0 right-0 w-full transition-colors duration-200 ease-in-out ${
+        className={`ios-standalone-header fixed top-0 left-0 right-0 w-full transition-colors duration-200 ease-in-out ${
           mobileMenuOpen ? "z-[60]" : "z-50"
         } ${
           headerIsDark
@@ -217,6 +217,15 @@ export const Navbar: React.FC = () => {
             : "bg-white border-b border-slate-200/90 text-slate-800 shadow-xs"
         }`}
       >
+        {/* Bande de la zone sûre (status bar iOS) : reste sombre quand le header est blanc,
+            sinon l'heure/batterie (texte blanc en black-translucent) seraient illisibles. */}
+        {!headerIsDark && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 bg-kawral-green"
+            style={{ height: "env(safe-area-inset-top, 0px)" }}
+          />
+        )}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* ── PREMIÈRE LIGNE : LOGO + RECHERCHE CENTRALE + ACCÈS RAPIDES + BOUTON PUBLIER ── */}
           <div className="flex items-center justify-between gap-3 sm:gap-4 lg:gap-6 h-16 sm:h-18">
