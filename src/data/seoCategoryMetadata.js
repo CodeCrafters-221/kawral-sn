@@ -197,9 +197,16 @@ export function getListingSeoMetadata({
     String(description || '').replace(/\s+/g, ' ').trim(),
   ].filter(Boolean);
 
+  const ogTitle = cleanTitle || seoTitle;
+  const ogDescription = cleanTitle
+    ? `Découvrez ${cleanTitle} sur Kawral. Contactez le vendeur pour plus d'informations.`
+    : "Découvrez cette annonce sur Kawral. Contactez le vendeur pour plus d'informations.";
+
   return {
     title: seoTitle,
     description: descriptionParts.join(' — ').slice(0, 160),
+    ogTitle,
+    ogDescription,
     city,
     transactionLabel,
   };

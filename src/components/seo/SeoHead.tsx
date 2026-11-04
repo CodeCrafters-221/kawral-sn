@@ -9,6 +9,9 @@ const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/kawral-app-icon.png`;
 export interface SeoHeadProps {
   title?: string;
   description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageAlt?: string;
   canonicalPath?: string;
   ogImage?: string;
   ogType?: 'website' | 'product' | 'article';
@@ -44,9 +47,25 @@ function setOrCreateCanonical(href: string): void {
   link.setAttribute('href', href);
 }
 
+function resolveAbsoluteHttpsImageUrl(rawUrl?: string): string {
+  const trimmed = (rawUrl || '').trim();
+  if (!trimmed) return DEFAULT_IMAGE;
+  if (trimmed.startsWith('https://')) return trimmed;
+  if (trimmed.startsWith('http://')) {
+    return `https://${trimmed.slice('http://'.length)}`;
+  }
+  if (trimmed.startsWith('//')) {
+    return `https:${trimmed}`;
+  }
+  return `${SITE_ORIGIN}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+}
+
 export const SeoHead: React.FC<SeoHeadProps> = ({
   title,
   description,
+  ogTitle,
+  ogDescription,
+  ogImageAlt,
   canonicalPath,
   ogImage,
   ogType = 'website',
@@ -63,6 +82,11 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 165);
+    const resolvedOgTitle = (ogTitle || fullTitle).replace(/\s+/g, ' ').trim();
+    const resolvedOgDescription = (ogDescription || cleanDescription)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 200);
     const cleanPath = canonicalPath
       ? canonicalPath.startsWith('/')
         ? canonicalPath
@@ -71,11 +95,10 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
         ? window.location.pathname
         : '/';
     const canonicalUrl = `${SITE_ORIGIN}${cleanPath === '/' ? '/' : cleanPath.replace(/\/+$/, '')}`;
-    const imageUrl = ogImage
-      ? ogImage.startsWith('http')
-        ? ogImage
-        : `${SITE_ORIGIN}${ogImage.startsWith('/') ? ogImage : `/${ogImage}`}`
-      : DEFAULT_IMAGE;
+    const imageUrl = resolveAbsoluteHttpsImageUrl(ogImage);
+    const resolvedImageAlt = (ogImageAlt || resolvedOgTitle || 'Kawral — Marketplace Sénégal')
+      .replace(/\s+/g, ' ')
+      .trim();
 
     document.title = fullTitle;
 
@@ -92,18 +115,17 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
     // Open Graph
     setOrCreateMeta('property', 'og:type', ogType);
     setOrCreateMeta('property', 'og:url', canonicalUrl);
-    setOrCreateMeta('property', 'og:title', fullTitle);
-    setOrCreateMeta('property', 'og:description', cleanDescription);
+    setOrCreateMeta('property', 'og:site_name', 'Kawral');
+    setOrCreateMeta('property', 'og:title', resolvedOgTitle);
+    setOrCreateMeta('property', 'og:description', resolvedOgDescription);
     setOrCreateMeta('property', 'og:image', imageUrl);
+    setOrCreateMeta('property', 'og:image:secure_url', imageUrl);
+    setOrCreateMeta('property', 'og:image:alt', resolvedImageAlt);
 
     // Twitter Card
-    setOrCreateMeta(
-      'name',
-      'twitter:card',
-      ogImage ? 'summary_large_image' : 'summary'
-    );
-    setOrCreateMeta('name', 'twitter:title', fullTitle);
-    setOrCreateMeta('name', 'twitter:description', cleanDescription);
+    setOrCreateMeta('name', 'twitter:card', 'summary_large_image');
+    setOrCreateMeta('name', 'twitter:title', resolvedOgTitle);
+    setOrCreateMeta('name', 'twitter:description', resolvedOgDescription);
     setOrCreateMeta('name', 'twitter:image', imageUrl);
 
     // Dynamic JSON-LD (nettoie d'abord l'éventuel bloc SSR pré-rendu)
@@ -128,7 +150,18 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
       const existing = document.getElementById(scriptId);
       if (existing) existing.remove();
     };
-  }, [title, description, canonicalPath, ogImage, ogType, noIndex, jsonLd]);
+  }, [
+    title,
+    description,
+    ogTitle,
+    ogDescription,
+    ogImageAlt,
+    canonicalPath,
+    ogImage,
+    ogType,
+    noIndex,
+    jsonLd,
+  ]);
 
   return null;
 };

@@ -8,6 +8,7 @@ import {
   recordLiveAnalyticsEvent,
   type AnalyticsPeriod,
 } from "./src/server/ga4Service";
+import seoHandler from "./api/seo.js";
 
 const app = express();
 const PORT = 3000;
@@ -444,6 +445,10 @@ app.post("/api/auth/validate-email", async (req, res) => {
 
 // Start Express + Vite Middleware setup
 async function startServer() {
+  app.get("/api/seo", (req, res) => {
+    void seoHandler(req, res);
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -454,6 +459,18 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
+    app.get(["/listings/:id", "/annonces/:id", "/annonce/:id"], (req, res) => {
+      req.query = { ...req.query, route: "listing", id: req.params.id };
+      void seoHandler(req, res);
+    });
+    app.get(["/categories/:slug", "/explorer/:slug"], (req, res) => {
+      req.query = { ...req.query, route: "category", slug: req.params.slug };
+      void seoHandler(req, res);
+    });
+    app.get("/explorer", (req, res) => {
+      req.query = { ...req.query, route: "explorer" };
+      void seoHandler(req, res);
+    });
     app.get("*", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });

@@ -57,7 +57,7 @@ export function buildWhatsAppUrl(
     const origin =
       typeof window !== "undefined" && window.location?.origin
         ? window.location.origin
-        : "https://kawral.sn";
+        : "https://www.kawral.sn";
     message += `\n\nLien de l'annonce : ${origin}/listings/${listingId}`;
   }
 

@@ -249,7 +249,7 @@ export const ListingDetailPage: React.FC = () => {
     const origin =
       typeof window !== "undefined" && window.location?.origin
         ? window.location.origin
-        : "https://kawral.sn";
+        : "https://www.kawral.sn";
     const convId = startConversation(
       listing,
       `Bonjour, je vous contacte pour "${listing.title}" (Réf: ${listingRef}). Est-elle disponible ?\nLien de l'annonce : ${origin}/listings/${listing.id}`,
@@ -259,8 +259,29 @@ export const ListingDetailPage: React.FC = () => {
     }
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleShare = async () => {
+    const canonicalUrl = `https://www.kawral.sn/listings/${listing.id}`;
+    const shareTitle = listing.title.trim();
+    const shareText = `${shareTitle}. Disponible sur Kawral ! Découvrez cette annonce : ${canonicalUrl}`;
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: canonicalUrl,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(canonicalUrl);
+    }
     addToast("Lien copié !", "info");
   };
 
@@ -307,6 +328,9 @@ export const ListingDetailPage: React.FC = () => {
       <SeoHead
         title={listingSeo.title}
         description={listingSeo.description}
+        ogTitle={listingSeo.ogTitle}
+        ogDescription={listingSeo.ogDescription}
+        ogImageAlt={listing.title}
         canonicalPath={`/listings/${listing.id}`}
         ogImage={listing.images?.[0]}
         ogType="product"
