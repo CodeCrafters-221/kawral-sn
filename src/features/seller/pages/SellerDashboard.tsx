@@ -6,7 +6,6 @@ import { getListingRef } from "../../../utils/whatsapp";
 import {
 	PlusCircle,
 	Eye,
-	MessageSquare,
 	Trash2,
 	Edit3,
 	Camera,
@@ -24,7 +23,6 @@ import {
 	Button,
 	Badge,
 	Card,
-	CardContent,
 	CardHeader,
 	CardTitle,
 	SafeImage,
@@ -34,6 +32,7 @@ import { profileService } from "../../../services/supabase/profileService";
 import { HostAvailabilityModal } from "../../../components/modals/HostAvailabilityModal";
 import { DeleteListingModal } from "../../../components/modals/DeleteListingModal";
 import { ListingStatusSelect } from "../components/ListingStatusSelect";
+import { SellerStatsGrid } from "../components/SellerStatsGrid";
 import { Listing } from "../../../types";
 
 export const SellerDashboard: React.FC = () => {
@@ -88,7 +87,7 @@ export const SellerDashboard: React.FC = () => {
 		(item) => item.ownerId === currentUser?.id,
 	);
 	const totalViews = sellerListings.reduce(
-		(sum, item) => sum + item.views,
+		(sum, item) => sum + (item.views || 0),
 		0,
 	);
 	const sellerListingIds = new Set(
@@ -106,12 +105,6 @@ export const SellerDashboard: React.FC = () => {
 	);
 	const publishedListings = sellerListings.filter(
 		(item) => item.status === "published",
-	).length;
-	const unavailableListings = sellerListings.filter(
-		(item) => item.status === "unavailable",
-	).length;
-	const soldListings = sellerListings.filter(
-		(item) => item.status === "sold",
 	).length;
 
 	const totalPages = Math.max(
@@ -137,6 +130,13 @@ export const SellerDashboard: React.FC = () => {
 		listingsSectionRef.current?.scrollIntoView({
 			behavior: "smooth",
 			block: "nearest",
+		});
+	};
+
+	const scrollToListings = () => {
+		listingsSectionRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
 		});
 	};
 
@@ -338,87 +338,25 @@ export const SellerDashboard: React.FC = () => {
 				</div>
 			</Card>
 
-			{/* Seller Metrics using Card */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-				<Card className="hover:shadow-sm transition-shadow">
-					<CardContent className="p-5 flex items-center justify-between">
-						<div>
-							<span className="text-xs font-semibold text-kawral-muted">
-								Annonces actives
-							</span>
-							<p className="text-2xl sm:text-3xl font-black text-kawral-green mt-1">
-								{publishedListings}
-							</p>
-							<p className="text-[10px] text-kawral-muted mt-0.5 font-medium">
-								{soldListings} vendue{soldListings > 1 ? "s" : ""} • {unavailableListings} en pause
-							</p>
-						</div>
-						<div className="p-3 bg-green-50 text-kawral-green rounded-2xl">
-							<Building2 className="w-5 h-5" />
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card className="hover:shadow-sm transition-shadow">
-					<CardContent className="p-5 flex items-center justify-between">
-						<div>
-							<span className="text-xs font-semibold text-kawral-muted">
-								Vues totales
-							</span>
-							<p className="text-2xl sm:text-3xl font-black text-kawral-orange mt-1">
-								{totalViews}
-							</p>
-						</div>
-						<div className="p-3 bg-orange-50 text-kawral-orange rounded-2xl">
-							<Eye className="w-5 h-5" />
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card
-					onClick={() => {
-						setCurrentView("messaging");
-						window.scrollTo({ top: 0, behavior: "smooth" });
-					}}
-					className="hover:shadow-sm transition-all cursor-pointer hover:border-kawral-green group"
-				>
-					<CardContent className="p-5 flex items-center justify-between">
-						<div>
-							<span className="text-xs font-semibold text-kawral-muted group-hover:text-kawral-green transition-colors">
-								Conversations
-							</span>
-							<p className="text-2xl sm:text-3xl font-black text-kawral-green mt-1">
-								{sellerConversations.length}
-							</p>
-						</div>
-						<div className="p-3 bg-kawral-green/10 text-kawral-green rounded-2xl group-hover:scale-110 transition-transform">
-							<MessageSquare className="w-5 h-5" />
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card
-					onClick={() => {
-						setCurrentView("appointments");
-						window.scrollTo({ top: 0, behavior: "smooth" });
-					}}
-					className="hover:shadow-sm transition-all cursor-pointer hover:border-kawral-orange group"
-				>
-					<CardContent className="p-5 flex items-center justify-between">
-						<div>
-							<span className="text-xs font-semibold text-kawral-muted group-hover:text-kawral-orange transition-colors">
-								Rendez-vous
-							</span>
-							<p className="text-2xl sm:text-3xl font-black text-kawral-orange mt-1">
-								{sellerAppointments.length}
-							</p>
-						</div>
-						<div className="p-3 bg-orange-50 text-kawral-orange rounded-2xl group-hover:scale-110 transition-transform">
-							<Calendar className="w-5 h-5" />
-						</div>
-					</CardContent>
-				</Card>
-			</div>
+			{/* Statistiques vendeur (comptage animé) */}
+			<SellerStatsGrid
+				userId={currentUser?.id}
+				isReady={!isLoadingListings}
+				activeListings={publishedListings}
+				totalViews={totalViews}
+				conversations={sellerConversations.length}
+				appointments={sellerAppointments.length}
+				onManageListings={scrollToListings}
+				onViewStatistics={scrollToListings}
+				onViewMessages={() => {
+					setCurrentView("messaging");
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				}}
+				onViewAgenda={() => {
+					setCurrentView("appointments");
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				}}
+			/>
 
 
 			{/* Seller Listings Table using Card */}

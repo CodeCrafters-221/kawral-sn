@@ -176,7 +176,7 @@ export const HeroSection: React.FC = () => {
       id="hero-section"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full min-h-[calc(100svh-70px)] sm:min-h-[620px] lg:min-h-[660px] h-[calc(100svh-70px)] sm:h-[78vh] sm:max-h-[820px] flex items-center justify-center overflow-hidden bg-[#0c1a22]"
+      className="relative w-full min-h-[calc(100svh-70px-env(safe-area-inset-bottom,0px))] sm:min-h-[620px] lg:min-h-[660px] h-[calc(100svh-70px-env(safe-area-inset-bottom,0px))] sm:h-[78vh] sm:max-h-[820px] flex items-center justify-center overflow-hidden bg-[#0c1a22]"
     >
       {/* Background Images Slider */}
       {HERO_SLIDES.map((slide, idx) => (
@@ -203,7 +203,7 @@ export const HeroSection: React.FC = () => {
       ))}
 
       {/* Main Centered Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 flex flex-col items-center justify-center text-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(8rem+env(safe-area-inset-top,0px))] sm:pt-[calc(9rem+env(safe-area-inset-top,0px))] lg:pt-40 pb-16 sm:pb-20 flex flex-col items-center justify-center text-center">
 
         {/* Editorial Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.15] tracking-tight max-w-4xl drop-shadow-xl mb-3 sm:mb-4 animate-fade-in">

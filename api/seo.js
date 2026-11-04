@@ -194,6 +194,9 @@ export default async function handler(req, res) {
       }
 
       const attrs = row.attributes || {};
+      const brand = typeof attrs.characteristics?.brand === 'string'
+        ? attrs.characteristics.brand.trim()
+        : '';
       const rawCategorySlug = String(attrs.category || '').trim();
       const catSlug = CATEGORY_SLUG_ALIASES[rawCategorySlug] || rawCategorySlug;
       const catInfo = SEO_CATEGORY_METADATA[catSlug];
@@ -246,6 +249,7 @@ export default async function handler(req, res) {
             description: row.description || seoDescription,
             ...(sortedImages.length > 0 ? { image: sortedImages } : {}),
             sku: row.id,
+            ...(brand ? { brand: { '@type': 'Brand', name: brand } } : {}),
             ...(categoryLabel ? { category: categoryLabel } : {}),
             offers: {
               '@type': 'Offer',

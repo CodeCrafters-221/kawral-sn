@@ -227,6 +227,10 @@ export const ListingDetailPage: React.FC = () => {
     listing.location.neighborhood,
     listing.location.city,
   ].filter(Boolean).join(", ");
+  const productBrand =
+    typeof listing.characteristics?.brand === "string"
+      ? listing.characteristics.brand.trim()
+      : "";
   const listingSeo = getListingSeoMetadata({
     title: listing.title,
     categoryLabel: listing.categoryLabel,
@@ -362,6 +366,14 @@ export const ListingDetailPage: React.FC = () => {
               "description": listing.description || listing.title,
               "image": listing.images,
               "sku": listing.id,
+              ...(productBrand
+                ? {
+                    "brand": {
+                      "@type": "Brand",
+                      "name": productBrand
+                    }
+                  }
+                : {}),
               "category": getCategoryLabel(listing.category),
               "offers": {
                 "@type": "Offer",
@@ -408,17 +420,6 @@ export const ListingDetailPage: React.FC = () => {
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-kawral-green" />
               <span>Retour aux annonces</span>
             </button>
-
-            {/* Bouton direct vers l'accueil sur mobile */}
-            <Link
-              to="/"
-              className="sm:hidden inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-kawral-green border border-slate-200 shadow-2xs font-bold text-xs transition-colors"
-              title="Retour à l'accueil"
-              aria-label="Accueil"
-            >
-              <Home className="w-3.5 h-3.5 text-slate-500" />
-              <span>Accueil</span>
-            </Link>
           </div>
 
           {/* Fil d'Ariane (breadcrumb) */}

@@ -45,7 +45,7 @@ const AppContent: React.FC = () => {
       {/* Main App Navbar (masqué sur la carte détail de l'annonce sur tous les appareils) */}
       {!isListingDetailPage && <Navbar />}
 
-      <main className={`flex-1 animate-fade-in ${!isHomePage && !isListingDetailPage ? 'pt-[164px] sm:pt-[120px] ios-standalone-header-offset' : ''}`}>
+      <main className={`flex-1 animate-fade-in ${!isHomePage && !isListingDetailPage ? 'ios-standalone-header-offset' : ''}`}>
         <AppRoutes />
       </main>
 

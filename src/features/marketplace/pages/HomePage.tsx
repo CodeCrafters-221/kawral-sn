@@ -64,9 +64,9 @@ export const HomePage: React.FC = () => {
 
       {/* ── GRILLE DES ANNONCES RÉCENTES (EXACTEMENT 4 PAR LIGNE SUR DESKTOP, 2 SUR MOBILE) ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-kawral-dark">
+        <div className="flex items-start sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-extrabold text-kawral-dark leading-tight">
               Annonces récentes
             </h2>
             <p className="text-xs text-kawral-muted mt-0.5">
@@ -76,10 +76,12 @@ export const HomePage: React.FC = () => {
           <Link
             to="/explorer"
             onClick={() => setCurrentView("search")}
-            className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
+            aria-label="Voir toutes les annonces"
+            className="shrink-0 whitespace-nowrap flex items-center gap-1 pt-1 sm:pt-0 text-xs sm:text-sm font-bold text-kawral-orange hover:underline cursor-pointer"
           >
-            <span>Voir toutes les annonces</span>
-            <ArrowRight className="w-4 h-4" />
+            <span className="sm:hidden">Voir tout</span>
+            <span className="hidden sm:inline">Voir toutes les annonces</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
         </div>
 
@@ -88,9 +90,9 @@ export const HomePage: React.FC = () => {
 
       {/* ── TENDANCE SUR KAWRAL ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-kawral-dark">
+        <div className="flex items-start sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-extrabold text-kawral-dark leading-tight">
               Tendance sur Kawral
             </h2>
             <p className="text-xs text-kawral-muted mt-0.5">
@@ -100,10 +102,12 @@ export const HomePage: React.FC = () => {
           <Link
             to="/explorer"
             onClick={() => setCurrentView("search")}
-            className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
+            aria-label="Voir toutes les annonces"
+            className="shrink-0 whitespace-nowrap flex items-center gap-1 pt-1 sm:pt-0 text-xs sm:text-sm font-bold text-kawral-orange hover:underline cursor-pointer"
           >
-            <span>Voir toutes les annonces</span>
-            <ArrowRight className="w-4 h-4" />
+            <span className="sm:hidden">Voir tout</span>
+            <span className="hidden sm:inline">Voir toutes les annonces</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
         </div>
 
@@ -119,9 +123,9 @@ export const HomePage: React.FC = () => {
       {/* ── LOCATION & VENTE IMMOBILIERE (1 LIGNE) ── */}
       {(isLoadingListings || realEstateListings.length > 0) && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-kawral-dark">
+          <div className="flex items-start sm:items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-2xl font-extrabold text-kawral-dark leading-tight">
                 Location & Vente immobilière
               </h2>
               <p className="text-xs text-kawral-muted mt-0.5">
@@ -134,10 +138,12 @@ export const HomePage: React.FC = () => {
                 e.preventDefault();
                 navigateToCategory("immobilier");
               }}
-              className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
+              aria-label="Voir toutes les annonces immobilières"
+              className="shrink-0 whitespace-nowrap flex items-center gap-1 pt-1 sm:pt-0 text-xs sm:text-sm font-bold text-kawral-orange hover:underline cursor-pointer"
             >
-              <span>Voir toutes les annonces</span>
-              <ArrowRight className="w-4 h-4" />
+              <span className="sm:hidden">Voir tout</span>
+              <span className="hidden sm:inline">Voir toutes les annonces</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
           </div>
 
@@ -148,9 +154,9 @@ export const HomePage: React.FC = () => {
       {/* ── APPAREILS ELECTRONIQUES (1 LIGNE) ── */}
       {(isLoadingListings || electronicsListings.length > 0) && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-kawral-dark">
+          <div className="flex items-start sm:items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-2xl font-extrabold text-kawral-dark leading-tight">
                 Appareils électroniques
               </h2>
               <p className="text-xs text-kawral-muted mt-0.5">
@@ -163,10 +169,12 @@ export const HomePage: React.FC = () => {
                 e.preventDefault();
                 navigateToCategory("electronique");
               }}
-              className="flex items-center gap-1 text-xs font-bold text-kawral-orange hover:underline cursor-pointer"
+              aria-label="Voir toutes les annonces électroniques"
+              className="shrink-0 whitespace-nowrap flex items-center gap-1 pt-1 sm:pt-0 text-xs sm:text-sm font-bold text-kawral-orange hover:underline cursor-pointer"
             >
-              <span>Voir toutes les annonces</span>
-              <ArrowRight className="w-4 h-4" />
+              <span className="sm:hidden">Voir tout</span>
+              <span className="hidden sm:inline">Voir toutes les annonces</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
           </div>
 
