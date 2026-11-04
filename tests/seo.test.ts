@@ -188,6 +188,36 @@ test('SEO API renders published listing metadata and 404s unpublished listings',
   assert.match(publishedListing.body, /name="robots" content="index, follow/);
   assert.ok(publishedListing.body.includes('Toyota Corolla'));
   assert.ok(publishedListing.body.includes('à vendre'));
+  assert.match(publishedListing.body, /property="og:title" content="Toyota Corolla"/);
+  assert.match(
+    publishedListing.body,
+    /property="og:description" content="Découvrez Toyota Corolla sur Kawral\. Contactez le vendeur pour plus d&#39;informations\."/
+  );
+  assert.match(
+    publishedListing.body,
+    /property="og:image" content="https:\/\/images\.example\/car\.jpg"/
+  );
+  assert.match(
+    publishedListing.body,
+    /property="og:image:secure_url" content="https:\/\/images\.example\/car\.jpg"/
+  );
+  assert.match(publishedListing.body, /property="og:image:alt" content="Toyota Corolla"/);
+  assert.match(
+    publishedListing.body,
+    new RegExp(`property="og:url" content="https://www\\.kawral\\.sn/listings/${listingId}"`)
+  );
+  assert.match(publishedListing.body, /property="og:type" content="product"/);
+  assert.match(publishedListing.body, /property="og:site_name" content="Kawral"/);
+  assert.match(publishedListing.body, /name="twitter:card" content="summary_large_image"/);
+  assert.match(publishedListing.body, /name="twitter:title" content="Toyota Corolla"/);
+  assert.match(
+    publishedListing.body,
+    /name="twitter:description" content="Découvrez Toyota Corolla sur Kawral\. Contactez le vendeur pour plus d&#39;informations\."/
+  );
+  assert.match(
+    publishedListing.body,
+    /name="twitter:image" content="https:\/\/images\.example\/car\.jpg"/
+  );
 
   const jsonLdText = publishedListing.body.match(
     /<script id="kawral-ssr-jsonld" type="application\/ld\+json">([\s\S]*?)<\/script>/
@@ -244,6 +274,94 @@ test('legacy listing URLs share the current SEO renderer and canonical route', a
       (rewrite: { destination: string }) =>
         rewrite.destination === '/api/seo?route=listing&id=:id'
     )
+  );
+});
+
+test('Open Graph uses cover image, falls back to Kawral logo only when no image exists, and resolves direct /listings/:id paths without duplicate meta tags', async () => {
+  const iphoneId = 'be7293e4-b369-41ed-9dc9-89839aa850db';
+  listingRows = [
+    {
+      id: iphoneId,
+      title: 'iPhone 14 Pro à vendre',
+      description: 'État neuf, batterie 98%, débloqué tout opérateur.',
+      price: 450_000,
+      location: 'Dakar, Almadies',
+      status: 'published',
+      transaction_type: 'sale',
+      attributes: { category: 'telephones', categoryLabel: 'Téléphones & smartphones' },
+      listing_images: [
+        {
+          image_url: 'https://osrjeifsmhwvlfsfiggx.supabase.co/storage/v1/object/public/listing-images/u1/l1/second.webp',
+          is_cover: false,
+          display_order: 0,
+        },
+        {
+          image_url: 'https://osrjeifsmhwvlfsfiggx.supabase.co/storage/v1/object/public/listing-images/u1/l1/cover-iphone.webp',
+          is_cover: true,
+          display_order: 1,
+        },
+      ],
+    },
+  ];
+  failListingRequest = false;
+  listingStatus = 200;
+
+  // Appel via le chemin direct /listings/:id tel que reçu lors d'une réécriture Vercel
+  const directPathResult = await callSeoHandler(`/listings/${iphoneId}`);
+  assert.equal(directPathResult.statusCode, 200);
+  assert.match(directPathResult.body, /property="og:title" content="iPhone 14 Pro à vendre"/);
+  assert.match(
+    directPathResult.body,
+    /property="og:description" content="Découvrez iPhone 14 Pro à vendre sur Kawral\. Contactez le vendeur pour plus d&#39;informations\."/
+  );
+  assert.match(
+    directPathResult.body,
+    /property="og:image" content="https:\/\/osrjeifsmhwvlfsfiggx\.supabase\.co\/storage\/v1\/object\/public\/listing-images\/u1\/l1\/cover-iphone\.webp"/
+  );
+  assert.match(
+    directPathResult.body,
+    /property="og:image:secure_url" content="https:\/\/osrjeifsmhwvlfsfiggx\.supabase\.co\/storage\/v1\/object\/public\/listing-images\/u1\/l1\/cover-iphone\.webp"/
+  );
+  assert.match(
+    directPathResult.body,
+    new RegExp(`property="og:url" content="https://www\\.kawral\\.sn/listings/${iphoneId}"`)
+  );
+
+  // Vérification de l'absence de doublons de balises meta Open Graph et Twitter
+  for (const prop of [
+    'og:title',
+    'og:description',
+    'og:image',
+    'og:image:secure_url',
+    'og:image:alt',
+    'og:url',
+    'og:type',
+    'og:site_name',
+  ]) {
+    const matches = directPathResult.body.match(new RegExp(`property="${prop}"`, 'g')) || [];
+    assert.equal(matches.length, 1, `Expected exactly 1 meta tag for ${prop}`);
+  }
+  for (const name of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image']) {
+    const matches = directPathResult.body.match(new RegExp(`name="${name}"`, 'g')) || [];
+    assert.equal(matches.length, 1, `Expected exactly 1 meta tag for ${name}`);
+  }
+
+  // Cas d'une annonce sans aucune image : repli sur le logo officiel Kawral
+  listingRows = [
+    {
+      ...listingRows[0],
+      listing_images: [],
+    },
+  ];
+  const noImageResult = await callSeoHandler(`/listings/${iphoneId}`);
+  assert.equal(noImageResult.statusCode, 200);
+  assert.match(
+    noImageResult.body,
+    /property="og:image" content="https:\/\/www\.kawral\.sn\/images\/kawral-app-icon\.png"/
+  );
+  assert.match(
+    noImageResult.body,
+    /property="og:image:secure_url" content="https:\/\/www\.kawral\.sn\/images\/kawral-app-icon\.png"/
   );
 });
 

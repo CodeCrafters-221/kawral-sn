@@ -1,10 +1,12 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import {
   getListingSeoMetadata,
   SEO_CATEGORY_METADATA,
 } from '../src/data/seoCategoryMetadata.js';
 
 const SITE_ORIGIN = 'https://www.kawral.sn';
-const DEFAULT_IMAGE = `${SITE_ORIGIN}/favicon-96x96.png`;
+const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/kawral-app-icon.png`;
 const CATEGORY_SLUG_ALIASES = {
   real_estate: 'immobilier',
   vehicle: 'vehicules',
@@ -26,34 +28,87 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+export function normalizePublicImageUrl(rawUrl) {
+  const trimmed = String(rawUrl || '').trim();
+  if (!trimmed) return '';
+
+  let candidate = trimmed;
+  if (candidate.startsWith('//')) {
+    candidate = `https:${candidate}`;
+  } else if (candidate.startsWith('/')) {
+    candidate = `${SITE_ORIGIN}${candidate}`;
+  } else if (candidate.startsWith('http://')) {
+    candidate = `https://${candidate.slice('http://'.length)}`;
+  }
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'https:') return '';
+    return parsed.toString();
+  } catch {
+    return '';
+  }
+}
+
+async function readLocalIndexHtmlFallback() {
+  const candidates = [
+    path.resolve(process.cwd(), 'dist', 'index.html'),
+    path.resolve(process.cwd(), 'index.html'),
+  ];
+  for (const filePath of candidates) {
+    try {
+      const content = await readFile(filePath, 'utf8');
+      if (content && content.includes('<head>')) {
+        return content;
+      }
+    } catch {
+      // Passe au candidat suivant
+    }
+  }
+  return null;
+}
+
 async function getIndexHtmlTemplate(req) {
   const now = Date.now();
   if (cachedTemplateHtml && now - cachedTemplateAt < 5 * 60 * 1000) {
     return cachedTemplateHtml;
   }
 
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'www.kawral.sn';
-  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers?.['x-forwarded-host'] || req.headers?.host || 'www.kawral.sn';
+  const proto = req.headers?.['x-forwarded-proto'] || 'https';
   const indexUrl = `${proto}://${host}/index.html`;
 
-  const response = await fetch(indexUrl, {
-    headers: { 'User-Agent': 'Kawral-SEO-Renderer/1.0' },
-    signal: AbortSignal.timeout(2500),
-  });
+  try {
+    const response = await fetch(indexUrl, {
+      headers: { 'User-Agent': 'Kawral-SEO-Renderer/1.0' },
+      signal: AbortSignal.timeout(3000),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to load index.html: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Failed to load index.html: ${response.status}`);
+    }
+
+    const html = await response.text();
+    cachedTemplateHtml = html;
+    cachedTemplateAt = now;
+    return html;
+  } catch (fetchErr) {
+    const localHtml = await readLocalIndexHtmlFallback();
+    if (localHtml) {
+      cachedTemplateHtml = localHtml;
+      cachedTemplateAt = now;
+      return localHtml;
+    }
+    throw fetchErr;
   }
-
-  const html = await response.text();
-  cachedTemplateHtml = html;
-  cachedTemplateAt = now;
-  return html;
 }
 
 async function fetchListingFromSupabase(id) {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseKey =
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Supabase public credentials are not configured for SEO rendering.');
   }
@@ -64,7 +119,7 @@ async function fetchListingFromSupabase(id) {
       apikey: supabaseKey,
       Authorization: `Bearer ${supabaseKey}`,
     },
-    signal: AbortSignal.timeout(2200),
+    signal: AbortSignal.timeout(4000),
   });
 
   if (!res.ok) {
@@ -80,9 +135,16 @@ async function fetchListingFromSupabase(id) {
 function injectSeoIntoHtml(html, seo) {
   const safeTitle = escapeHtml(seo.title);
   const safeDesc = escapeHtml(seo.description);
+  const safeOgTitle = escapeHtml(seo.ogTitle || seo.title);
+  const safeOgDesc = escapeHtml(seo.ogDescription || seo.description);
   const safeCanonical = escapeHtml(seo.canonicalUrl);
-  const safeImage = escapeHtml(seo.image || DEFAULT_IMAGE);
+  const resolvedImage = normalizePublicImageUrl(seo.image) || DEFAULT_IMAGE;
+  const safeImage = escapeHtml(resolvedImage);
+  const safeImageAlt = escapeHtml(
+    seo.imageAlt || seo.ogTitle || seo.title || 'Kawral — Marketplace Sénégal'
+  );
   const safeType = escapeHtml(seo.ogType || 'website');
+  const safeTwitterCard = escapeHtml(seo.twitterCard || 'summary_large_image');
   const safeRobots = escapeHtml(
     seo.noIndex
       ? 'noindex, nofollow'
@@ -112,23 +174,33 @@ function injectSeoIntoHtml(html, seo) {
     `<link rel="canonical" href="${safeCanonical}" />`
   );
 
-  // Open Graph & Twitter tags
-  const replaceMetaProp = (attrName, attrVal, newContent) => {
+  // Open Graph & Twitter tags (remplacement sans doublon ou insertion propre)
+  const upsertMetaProp = (attrName, attrVal, newContent) => {
+    const escapedAttrVal = attrVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(
-      `<meta\\s+${attrName}="${attrVal}"\\s+content="[^"]*"\\s*\\/?>`,
+      `<meta\\s+${attrName}="${escapedAttrVal}"\\s+content="[^"]*"\\s*\\/?>`,
       'i'
     );
-    updated = updated.replace(regex, `<meta ${attrName}="${attrVal}" content="${newContent}" />`);
+    const replacement = `<meta ${attrName}="${attrVal}" content="${newContent}" />`;
+    if (regex.test(updated)) {
+      updated = updated.replace(regex, replacement);
+    } else {
+      updated = updated.replace(/<\/head>/i, `    ${replacement}\n  </head>`);
+    }
   };
 
-  replaceMetaProp('property', 'og:type', safeType);
-  replaceMetaProp('property', 'og:url', safeCanonical);
-  replaceMetaProp('property', 'og:title', safeTitle);
-  replaceMetaProp('property', 'og:description', safeDesc);
-  replaceMetaProp('property', 'og:image', safeImage);
-  replaceMetaProp('name', 'twitter:title', safeTitle);
-  replaceMetaProp('name', 'twitter:description', safeDesc);
-  replaceMetaProp('name', 'twitter:image', safeImage);
+  upsertMetaProp('property', 'og:type', safeType);
+  upsertMetaProp('property', 'og:url', safeCanonical);
+  upsertMetaProp('property', 'og:site_name', 'Kawral');
+  upsertMetaProp('property', 'og:title', safeOgTitle);
+  upsertMetaProp('property', 'og:description', safeOgDesc);
+  upsertMetaProp('property', 'og:image', safeImage);
+  upsertMetaProp('property', 'og:image:secure_url', safeImage);
+  upsertMetaProp('property', 'og:image:alt', safeImageAlt);
+  upsertMetaProp('name', 'twitter:card', safeTwitterCard);
+  upsertMetaProp('name', 'twitter:title', safeOgTitle);
+  upsertMetaProp('name', 'twitter:description', safeOgDesc);
+  upsertMetaProp('name', 'twitter:image', safeImage);
 
   // Dynamic JSON-LD block
   if (seo.jsonLd) {
@@ -138,6 +210,35 @@ function injectSeoIntoHtml(html, seo) {
   }
 
   return updated;
+}
+
+function resolveRouteParams(req, urlObj) {
+  const queryObj = req.query && typeof req.query === 'object' ? req.query : {};
+  let route = String(queryObj.route || urlObj.searchParams.get('route') || '').trim();
+  let id = String(queryObj.id || urlObj.searchParams.get('id') || '').trim();
+  let slug = String(queryObj.slug || urlObj.searchParams.get('slug') || '').trim();
+
+  if (!route) {
+    const pathname = urlObj.pathname || '/';
+    const listingMatch = pathname.match(/^\/(?:listings|annonces|annonce)\/([^/?#]+)\/?$/i);
+    if (listingMatch) {
+      route = 'listing';
+      id = decodeURIComponent(listingMatch[1]).trim();
+    } else if (/^\/(?:listings|annonces|annonce)\/?$/i.test(pathname)) {
+      route = 'listing';
+      id = '';
+    } else {
+      const categoryMatch = pathname.match(/^\/(?:categories|explorer)\/([^/?#]+)\/?$/i);
+      if (categoryMatch) {
+        route = 'category';
+        slug = decodeURIComponent(categoryMatch[1]).trim();
+      } else if (/^\/explorer\/?$/i.test(pathname)) {
+        route = 'explorer';
+      }
+    }
+  }
+
+  return { route, id, slug };
 }
 
 function sendNotFound(res, html, title, description, canonicalUrl) {
@@ -165,11 +266,10 @@ export default async function handler(req, res) {
   try {
     const htmlTemplate = await getIndexHtmlTemplate(req);
     const urlObj = new URL(req.url || '/', SITE_ORIGIN);
-    const route = urlObj.searchParams.get('route') || '';
+    const { route, id, slug } = resolveRouteParams(req, urlObj);
 
     // 1. Route /listings/:id
     if (route === 'listing') {
-      const id = (urlObj.searchParams.get('id') || '').trim();
       const canonicalUrl = `${SITE_ORIGIN}/listings/${encodeURIComponent(id)}`;
       if (!id) {
         return sendNotFound(
@@ -203,8 +303,13 @@ export default async function handler(req, res) {
       const categoryLabel = attrs.categoryLabel || catInfo?.label || '';
       const sortedImages = Array.isArray(row.listing_images)
         ? [...row.listing_images]
-            .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-            .map((img) => img.image_url)
+            .sort((a, b) => {
+              if (Boolean(b?.is_cover) !== Boolean(a?.is_cover)) {
+                return b?.is_cover ? 1 : -1;
+              }
+              return (a?.display_order ?? 0) - (b?.display_order ?? 0);
+            })
+            .map((img) => normalizePublicImageUrl(img?.image_url))
             .filter(Boolean)
         : [];
       const primaryImage = sortedImages[0] || DEFAULT_IMAGE;
@@ -218,6 +323,10 @@ export default async function handler(req, res) {
       });
       const seoTitle = seo.title || 'Annonce au Sénégal | Kawral';
       const seoDescription = seo.description || seoTitle;
+      const ogTitle = seo.ogTitle || String(row.title || '').trim() || seoTitle;
+      const ogDescription =
+        seo.ogDescription ||
+        `Découvrez ${ogTitle} sur Kawral. Contactez le vendeur pour plus d'informations.`;
       const price = Number(row.price);
 
       const jsonLd = {
@@ -276,9 +385,13 @@ export default async function handler(req, res) {
       const rendered = injectSeoIntoHtml(htmlTemplate, {
         title: seoTitle,
         description: seoDescription,
+        ogTitle,
+        ogDescription,
         canonicalUrl,
         image: primaryImage,
+        imageAlt: ogTitle,
         ogType: 'product',
+        twitterCard: 'summary_large_image',
         jsonLd,
       });
 
@@ -289,7 +402,6 @@ export default async function handler(req, res) {
 
     // 2. Route /categories/:slug
     if (route === 'category') {
-      const slug = (urlObj.searchParams.get('slug') || '').trim();
       const canonicalUrl = `${SITE_ORIGIN}/categories/${encodeURIComponent(slug)}`;
       const catInfo = SEO_CATEGORY_METADATA[slug];
       if (!catInfo) {
